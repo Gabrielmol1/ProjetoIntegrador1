@@ -5,6 +5,7 @@
 #include <cstdlib> // rand 
 #include <ctime>// time
 #include <vector>
+#include <iomanip> // Para formatar a saída
 
 using namespace std;
 
@@ -12,12 +13,14 @@ using namespace std;
 
 void salvarJogador_txt(string nome, string senha);
 void salvarEstatisticas_txt();
+void salvarDadosPartida(const Partida& partida);
 void jogar_Ludo();
 void fecharJogo();
 void validarLogin(string nome, string senha);
 void editarPerfil(string nomeAtual, string senhaAtual);
-void rolarDado();
+int rolarDado();
 void inicializarSemente();
+string gerarIDPartida(int incremento);
 void turnoJogador(int jogador);
 void listaDeJogadores();
 
@@ -69,6 +72,22 @@ void salvarEstatisticas_txt(){ // nao esquecer de passar os dados como parametro
   //       cout << "Erro ao salvar os dados." << endl;
   //   }
 	
+}
+
+void salvarDadosPartida(const Partida& partida) {
+    ofstream arquivo("partida.txt");
+
+    if (arquivo.is_open()) {
+        arquivo << "ID da Partida: " << partida.id << endl;
+        arquivo << "Quantidade de Jogadores: " << partida.quantidadeJogadores << endl;
+        for (const auto& jogador : partida.jogadores) {
+            arquivo << "Jogador: " << jogador.first << " (Cor: " << jogador.second << ")" << endl;
+        }
+        arquivo.close();
+        cout << "Dados da partida salvos com sucesso." << endl;
+    } else {
+        cout << "Erro ao abrir o arquivo para salvar os dados da partida." << endl;
+    }
 }
 
  void validarLogin(string nome, string senha) {
@@ -168,7 +187,7 @@ void editarPerfil(string nomeAtual, string senhaAtual) {
     }
 }
 
-void rolarDado(){
+int rolarDado(){
      // Geração de número aleatório de 1 a 6
     return srand() % 6 + 1;
 }
@@ -176,9 +195,42 @@ void rolarDado(){
 void inicializarSemente() {
     srand(time(NULL));
 }
+
 bool verificarUmOuSeis(int numero) {
     return (numero == 1 || numero == 6);
 }
+
+struct Peca {
+    int posicao;
+    bool naToca; // Indica se a peça está na "toca" ou em jogo
+};
+
+struct Jogador {
+    string nome;
+    string cor;
+    vector<Peca> pecas; // Pode ser um vetor com as peças do jogador
+};
+
+struct Tabuleiro {
+    vector<Jogador> jogadores;
+    // Outros elementos do tabuleiro, como casas especiais, por exemplo
+};
+
+string gerarIDPartida(int incremento) {
+    // Obter a data e hora atuais
+    auto agora = std::chrono::system_clock::now();
+    std::time_t tempo_agora = std::chrono::system_clock::to_time_t(agora);
+    
+    // Converter a data e hora para uma string formatada
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&tempo_agora), "%Y%m%d%H%M%S"); // Formato: AAAAMMDDHHMMSS
+
+    // Adicionar o valor de incremento ao final do ID da partida
+    ss << "_" << incremento;
+
+    return ss.str();
+}
+
 void turnoJogador(int jogador) {
     int numeroDado;
     // Realizando o lançamento do dado até obter 1 ou 6
@@ -195,40 +247,104 @@ void turnoJogador(int jogador) {
     // Aqui você pode adicionar a lógica para mover as peças do Ludo
     // conforme as regras do jogo.
 }
-struct Jogador {
-    string nome;
-    string cor;
-    vector<Peca> pecas; // Pode ser um vetor com as peças do jogador
-};
 
-struct Peca {
-    int posicao;
-    bool naToca; // Indica se a peça está na "toca" ou em jogo
-};
+void listaDeJogadores() {
 
-struct Tabuleiro {
-    vector<Jogador> jogadores;
-    // Outros elementos do tabuleiro, como casas especiais, por exemplo
-};
+    ifstream arquivo_jogadores("jogadores.txt");
+    if (arquivo_jogadores.is_open()) {
+        vector<string> nomes;
+        string linha;
+        while (getline(arquivo_jogadores, linha)) {
+            if (linha.find("Nome: ") != string::npos) {
+                nomes.push_back(linha.substr(6)); // Adiciona o nome à lista
+            }
+        }
+        arquivo_jogadores.close();
 
-void listaDeJogadores(){
+        // Ordenar os nomes em ordem alfabética
+        sort(nomes.begin(), nomes.end());
 
+        cout << "Lista de Jogadores:" << endl;
+        for (int i = 0; i < nomes.size(); ++i) {
+            cout << i + 1 << ". " << nomes[i] << endl;
+        }
 
+        // Permitir pesquisa por nome
+        string nomePesquisado;
+        cout << "\nDigite o nome do jogador que deseja selecionar: ";
+        cin >> nomePesquisado;
+
+        // Verificar se o nome está na lista
+        auto it = find(nomes.begin(), nomes.end(), nomePesquisado);
+        if (it != nomes.end()) {
+            cout << "Jogador encontrado: " << *it << endl;
+            // Aqui você pode realizar alguma ação com o jogador selecionado
+        } else {
+            cout << "Jogador não encontrado." << endl;
+        }
+    } else {
+        cout << "Erro ao abrir o arquivo de jogadores." << endl;
+        return; // Sai do método se houver um erro ao abrir o arquivo
+    }
+
+    // O código abaixo será executado somente se o arquivo for aberto com sucesso
+    int escolha;
+    cout << "\nSelecione o número correspondente ao jogador que deseja adicionar à partida: ";
+    cin >> escolha;
+
+    if (escolha >= 1 && escolha <= nomes.size()) {
+        string jogadorSelecionado = nomes[escolha - 1];
+        cout << "Jogador selecionado: " << jogadorSelecionado << endl;
+        // Aqui você pode realizar alguma ação com o jogador selecionado
+    } else {
+        cout << "Opção inválida. Selecione um número válido da lista." << endl;
+    }
 }
 
 void jogar_Ludo() {
+    int incremento_sequencial = 1;
+
+    // Gerar o ID da partida
+    string id_partida = gerarIDPartida(incremento_sequencial);
+
     int num_jogadores;
     cout << "Quantos jogadores deseja? (2, 3 ou 4): ";
     cin >> num_jogadores;
 
-    // Lógica para selecionar cores e jogadores
+    // Mostrar lista de jogadores e permitir que cada jogador escolha sua cor
+    vector<string> cores_disponiveis = {"Vermelho", "Azul", "Verde", "Amarelo"};
+    vector<pair<string, string>> jogadores_e_cores; // Pares de jogador e cor escolhida
 
-    // Mostrar lista de jogadores e permitir pesquisa
+    for (int i = 1; i <= num_jogadores; ++i) {
+        cout << "Escolha o jogador " << i << " da lista abaixo:" << endl;
+        listaDeJogadores(); // Mostra a lista de jogadores disponíveis
+        int escolha_jogador;
+        cin >> escolha_jogador;
+        // Adiciona o jogador escolhido com sua cor correspondente
+        jogadores_e_cores.push_back(make_pair(nomes[escolha_jogador - 1], ""));
 
-    // Inicialização do jogo e implementação das regras
+        cout << "Escolha a cor para o jogador " << jogadores_e_cores.back().first << ":" << endl;
+        for (int j = 0; j < cores_disponiveis.size(); ++j) {
+            cout << j + 1 << ". " << cores_disponiveis[j] << endl;
+        }
+        int escolha_cor;
+        cin >> escolha_cor;
+        if (escolha_cor >= 1 && escolha_cor <= cores_disponiveis.size()) {
+            jogadores_e_cores.back().second = cores_disponiveis[escolha_cor - 1];
+            cout << "O jogador " << jogadores_e_cores.back().first << " escolheu a cor " << jogadores_e_cores.back().second << endl;
+            cores_disponiveis.erase(cores_disponiveis.begin() + escolha_cor - 1); // Remover a cor escolhida das opções disponíveis
+        } else {
+            cout << "Opção inválida. Escolha uma cor válida." << endl;
+            --i; // Voltar para o jogador anterior
+        }
+    }
+
+    // Agora você tem os jogadores e suas cores correspondentes em "jogadores_e_cores"
+    // Inicialize o jogo com essas informações
+    // ...
 }
-
-
+ 
+ 
 // ABAIXO DESTE PONTO ESTAO AS TELAS  XDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDX
 
 void tela_Login() {
