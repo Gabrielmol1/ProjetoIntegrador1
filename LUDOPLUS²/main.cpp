@@ -2,6 +2,9 @@
 #include <fstream>
 #include <string>
 #include <cstdlib> // Para usar a função system()
+#include <cstdlib> // rand 
+#include <ctime>// time
+#include <vector>
 
 using namespace std;
 
@@ -9,9 +12,14 @@ using namespace std;
 
 void salvarJogador_txt(string nome, string senha);
 void salvarEstatisticas_txt();
+void jogar_Ludo();
 void fecharJogo();
 void validarLogin(string nome, string senha);
 void editarPerfil(string nomeAtual, string senhaAtual);
+void rolarDado();
+void inicializarSemente();
+void turnoJogador(int jogador);
+void listaDeJogadores();
 
 //inicializacao das telas antes da main 
 
@@ -160,6 +168,67 @@ void editarPerfil(string nomeAtual, string senhaAtual) {
     }
 }
 
+void rolarDado(){
+     // Geração de número aleatório de 1 a 6
+    return srand() % 6 + 1;
+}
+
+void inicializarSemente() {
+    srand(time(NULL));
+}
+bool verificarUmOuSeis(int numero) {
+    return (numero == 1 || numero == 6);
+}
+void turnoJogador(int jogador) {
+    int numeroDado;
+    // Realizando o lançamento do dado até obter 1 ou 6
+    do {
+        numeroDado = rolarDado();
+        cout << "Jogador " << jogador << ", você rolou o dado! O número obtido é: " << numeroDado << endl;
+        if (!verificarUmOuSeis(numeroDado)) {
+            cout << "Você não pode sair da casinha ainda. Passando a vez para o próximo jogador." << endl;
+            return; // Saindo do turno do jogador atual
+        }
+        cout << "Parabéns! Você pode sair da casinha e jogar novamente." << endl;
+    } while (numeroDado == 6); // Jogar novamente se o número for 6
+
+    // Aqui você pode adicionar a lógica para mover as peças do Ludo
+    // conforme as regras do jogo.
+}
+struct Jogador {
+    string nome;
+    string cor;
+    vector<Peca> pecas; // Pode ser um vetor com as peças do jogador
+};
+
+struct Peca {
+    int posicao;
+    bool naToca; // Indica se a peça está na "toca" ou em jogo
+};
+
+struct Tabuleiro {
+    vector<Jogador> jogadores;
+    // Outros elementos do tabuleiro, como casas especiais, por exemplo
+};
+
+void listaDeJogadores(){
+
+
+}
+
+void jogar_Ludo() {
+    int num_jogadores;
+    cout << "Quantos jogadores deseja? (2, 3 ou 4): ";
+    cin >> num_jogadores;
+
+    // Lógica para selecionar cores e jogadores
+
+    // Mostrar lista de jogadores e permitir pesquisa
+
+    // Inicialização do jogo e implementação das regras
+}
+
+
 // ABAIXO DESTE PONTO ESTAO AS TELAS  XDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDX
 
 void tela_Login() {
@@ -252,7 +321,6 @@ void tela_Menu() {
     
 }
 
-
 void tela_Cadastrar() {
 	
     system("cls"); // Limpa o console antes de exibir a tela de cadastro
@@ -275,6 +343,16 @@ void tela_Cadastrar() {
 void tela_Jogar() {
 
     system("cls"); // Limpa o console antes de exibir a tela de cadastro
+
+    inicializarSemente();
+
+    jogar_Ludo();
+
+    // Simulação de um jogo de Ludo com 4 jogadores
+    for (int i = 1; i <= 4; ++i) {
+        turnoJogador(i);
+    }
+
 	
 		cout << "         ****************** TELA DO JOGO ******************" << endl;
         cout << "   AINDA NAO FOI FEITO MANe " << endl;
