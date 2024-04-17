@@ -168,10 +168,16 @@ void tela_Login() {
 	
 	string nome, senha;
 	
-	cout << "                   " << endl;
-	cout << "         ****************** TELA DE LOGIN ******************" << endl << endl << endl << endl;
+	cout << "\033[1;31m==============================================\033[0m" << endl;
+    cout << "\033[1;37m             BEM-VINDO AO LUDO PLUS         \033[0m" << endl;
+    cout << "\033[1;31m==============================================\033[0m" << endl;
+    cout << "\033[1;37m                                              \033[0m" << endl;
+    cout << "\033[1;37m             [1] - FAZER LOGIN              \033[0m" << endl;
+    cout << "\033[1;37m             [2] - CADASTRAR                \033[0m" << endl;
+    cout << "\033[1;37m             [3] - SAIR                     \033[0m" << endl;
+    cout << "\033[1;37m                                              \033[0m" << endl;
+    cout << "\033[1;31m==============================================\033[0m" << endl;
 
-    cout << "            Digite 1 para fazer login\n            Digite 2 para cadastrar-se\n            Digite 3 para sair\n    " << endl;
     int opcao;
     cin >> opcao;
 
@@ -253,13 +259,15 @@ void tela_Cadastrar() {
 
 	string nome, senha;
 	
-		cout << "         ****************** CADASTRAR JOGADOR ******************" << endl;
+		cout << "\033[1;31m===========================\033[0m" << endl;
+		cout << "      CADASTRAR JOGADOR     " << endl;
+		cout << "\033[1;31m===========================\033[0m" << endl << endl;
 
-    cout << "Digite seu nome: ";
+    cout << "\033[1;32mInforme o Seu nome:\033[0m" << endl;
     cin >> nome;
-    cout << "Digite sua senha: ";
+    cout << "\033[1;32mInforme a sua senha:\033[0m " << endl;
     cin >> senha;
-
+    
     salvarJogador_txt(nome, senha);
   
 }
@@ -270,6 +278,26 @@ void tela_Jogar() {
 	
 		cout << "         ****************** TELA DO JOGO ******************" << endl;
         cout << "   AINDA NAO FOI FEITO MANe " << endl;
+
+    cout << "*************************************" << endl;
+    cout << "**             |V| | |             **" << endl;
+    cout << "**             | |\033[31m#\033[0m|\033[31m#\033[0m|             **" << endl;
+    cout << "**     |\033[32m#\033[0m|\033[32m#\033[0m|   | |\033[31m#\033[0m| |   |\033[31m#\033[0m|\033[31m#\033[0m|     **" << endl;
+    cout << "**     |\033[32m#\033[0m|\033[32m#\033[0m|   |C|\033[31m#\033[0m| |   |\033[31m#\033[0m|\033[31m#\033[0m|     **" << endl;
+    cout << "**             | |\033[31m#\033[0m| |             **" << endl;
+    cout << "**             |_|\033[31m#\033[0m|V|             **" << endl;
+    cout << "** | |\033[32m#\033[0m| | | |V|  \033[31m#\033[0m  | | |C| | |V| **" << endl;
+    cout << "** | |\033[32m#\033[0m|\033[32m#\033[0m|\033[32m#\033[0m|\033[32m#\033[0m|\033[32m#\033[0m|\033[32m#\033[0m W \033[34m#\033[0m|\033[34m#\033[0m|\033[34m#\033[0m|\033[34m#\033[0m|\033[34m#\033[0m|\033[34m#\033[0m| | **" << endl;
+    cout << "** |V| | |C| | |_ \033[33m#\033[0m _|V| | | |\033[34m#\033[0m| | **" << endl;
+    cout << "**             |V|\033[33m#\033[0m| |             **" << endl;
+    cout << "**             | |\033[33m#\033[0m| |             **" << endl;
+    cout << "**     |\033[33m#\033[0m|\033[33m#\033[0m|   | |\033[33m#\033[0m|C|   |\033[34m#\033[0m|\033[34m#\033[0m|     **" << endl;
+    cout << "**     |\033[33m#\033[0m|\033[33m#\033[0m|   | |\033[33m#\033[0m| |   |\033[34m#\033[0m|\033[34m#\033[0m|     **" << endl;
+    cout << "**             |\033[33m#\033[0m|\033[33m#\033[0m| |             **" << endl;
+    cout << "**             | | |V|             **" << endl;
+    cout << "*************************************" << endl;
+
+
 
 }
 
