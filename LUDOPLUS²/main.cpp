@@ -1,7 +1,9 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <cstdlib> // Para usar a função system()
+#include <iostream> //entrada e saida
+#include <fstream> // manipulação de arquivo txt
+#include <string> // utilzacao de string, manipulcao de texto
+#include <cstdlib> // Para usar a função system
+#include <algorithm> // sort e find
+#include <vector> // usar vetores
 
 using namespace std;
 
@@ -9,9 +11,11 @@ using namespace std;
 
 void salvarJogador_txt(string nome, string senha);
 void salvarEstatisticas_txt();
+void salvarPartida();// salva os jogadores na partida, suas cores, o id da partida e susa data e hora 
 void fecharJogo();
 void validarLogin(string nome, string senha);
 void editarPerfil(string nomeAtual, string senhaAtual);
+void selecionarJogadoresECoresParaPartida();
 
 //inicializacao das telas antes da main 
 
@@ -20,6 +24,7 @@ void tela_Menu();
 void tela_Cadastrar();
 void tela_Jogar();
 void tela_Ranking();
+void tela_HistoricoPartidas();
 void tela_EditarPerfil();
 void tela_Regras();
 
@@ -27,8 +32,6 @@ void tela_Regras();
 int main() {
 	
     tela_Login();
-    
-    
     return 0;    
 }
 
@@ -62,6 +65,10 @@ void salvarEstatisticas_txt(){ // nao esquecer de passar os dados como parametro
   //   }
 	
 }
+
+void salvarPartida(){                                           
+
+  }
 
  void validarLogin(string nome, string senha) {
 
@@ -160,6 +167,72 @@ void editarPerfil(string nomeAtual, string senhaAtual) {
     }
 }
 
+void selecionarJogadoresECoresParaPartida(){
+
+    int num_jogadores;
+
+    do {
+        cout << "Quantos jogadores deseja na partida? (Entre 2 e 4): ";
+        cin >> num_jogadores;
+        if (num_jogadores < 2 || num_jogadores > 4) {
+            cout << "Número de jogadores inválido. Por favor, escolha entre 2 e 4 jogadores." << endl;
+        }
+    } while (num_jogadores < 2 || num_jogadores > 4);
+
+    ifstream arquivo_jogadores("jogadores.txt", ios::in);
+    vector<string> nomes; // Declarar a variável nomes fora do bloco condicional
+    vector<string> JogadoresSelecionados;
+    if (arquivo_jogadores.is_open()) {
+        string linha;
+        while (getline(arquivo_jogadores, linha)) {
+            if (linha.find("Nome: ") != string::npos) {
+                nomes.push_back(linha.substr(6)); // Adiciona o nome à lista
+            }
+        }
+        arquivo_jogadores.close();
+
+        // Ordenar os nomes em ordem alfabética
+        sort(nomes.begin(), nomes.end());
+
+        cout << "Lista de Jogadores:" << endl;
+        for (int i = 0; i < nomes.size(); ++i) {
+            cout << i + 1 << ". " << nomes[i] << endl;
+        }
+
+        // Permitir pesquisa por nome
+        string nomePesquisado;
+        cout << "\nDigite o nome do jogador que deseja selecionar: ";
+        cin >> nomePesquisado;
+
+        // Verificar se o nome está na lista
+        auto it = find(nomes.begin(), nomes.end(), nomePesquisado);
+        if (it != nomes.end()) {
+
+
+            cout << "Jogador " << *it << "encontrado " << endl;
+            
+        } else {
+            cout << "Jogador não encontrado." << endl;
+        }
+    } else {
+        cout << "Erro ao abrir o arquivo de jogadores." << endl;
+        return; // Sai do método se houver um erro ao abrir o arquivo
+    }
+
+    // O código abaixo será executado somente se o arquivo for aberto com sucesso
+    int escolha;
+    cout << "\nSelecione o número correspondente ao jogador que deseja adicionar à partida: ";
+    cin >> escolha;
+
+    if (escolha >= 1 && escolha <= nomes.size()) {
+        string jogadorSelecionado = nomes[escolha - 1];
+        cout << "Jogador selecionado: " << jogadorSelecionado << endl;
+        // Aqui você pode realizar alguma ação com o jogador selecionado
+    } else {
+        cout << "Opção inválida. Selecione um número válido da lista." << endl;
+    }
+}
+
 // ABAIXO DESTE PONTO ESTAO AS TELAS  XDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDX
 
 void tela_Login() {
@@ -210,48 +283,49 @@ void tela_Menu() {
     cout << "           |                                     |  " << endl;
     cout << "           | Digite 1 para jogar                 |  " << endl;
     cout << "           | Digite 2 para ver o Ranking         |  " << endl;
-    cout << "           | Digite 3 para editar seu perfil     |  " << endl;
-    cout << "           | Digite 4 para ver as regras do jogo |  " << endl;
-    cout << "           | Digite 5 voltar ao login            |  " << endl;
-    cout << "           | Digite 6 para sair do jogo          |  " << endl;
+    cout << "           | Digite 3 para ver o historico       |  " << endl;
+    cout << "           | Digite 4 para editar seu perfil     |  " << endl;
+    cout << "           | Digite 5 para ver as regras do jogo |  " << endl;
+    cout << "           | Digite 6 voltar ao login            |  " << endl;
+    cout << "           | Digite 7 para sair do jogo          |  " << endl;
     cout << "           |_____________________________________|  " << endl;
 
     cin >> opcao_Menu;
     
     if(opcao_Menu == 1){
     	
-	 tela_Jogar();
-    	
+	void selecionarJogadoresECoresParaPartida();	
 	}
 	else if (opcao_Menu == 2){
 		
 	 tela_Ranking();
-
 	}
-	else if (opcao_Menu == 3){
+    else if (opcao_Menu == 3){
 		
- 	tela_EditarPerfil();
-
+ 	 tela_HistoricoPartidas();
 	}
 	else if (opcao_Menu == 4){
 		
-	 tela_Regras();
-
+ 	 tela_EditarPerfil();
 	}
 	else if (opcao_Menu == 5){
 		
-	 tela_Login();
-
+	 tela_Regras();
 	}
 	else if (opcao_Menu == 6){
 		
-	 fecharJogo();
-
+	 tela_Login();
 	}
-	
-    
-}
+	else if (opcao_Menu == 7){
+		
+	 fecharJogo();
+	}
+    else {
 
+    cout << "opção invalida, digite novamente";
+    tela_Menu();
+    }
+}
 
 void tela_Cadastrar() {
 	
@@ -301,7 +375,7 @@ void tela_Jogar() {
 
 }
 
- void tela_Ranking() {
+void tela_Ranking() {
 
     system("cls"); // Limpa o console antes de exibir a tela de ranking
  	
@@ -320,6 +394,11 @@ void tela_Jogar() {
   //  }
 }
  
+void tela_HistoricoPartidas(){
+   // le o arquivo do historico de partidas e exibe a a lisat dos hotiroco
+   // a 1 coluna da lista é o id da partida, seguido da data e hora da partida e entao os jogadores com suas respectivas cores e o placar da partida 
+}
+
 void tela_EditarPerfil() {
 
     system("cls"); // Limpa o console antes de exibir a tela de editarperfil
