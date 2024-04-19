@@ -10,11 +10,10 @@ using namespace std;
 //inicializacao dos metodos antes da main 
 
 void salvarJogador_txt(string nome, string senha);
-void salvarEstatisticas_txt();
-void salvarPartida();// salva os jogadores na partida, suas cores, o id da partida e susa data e hora 
+void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<string, string>> jogadoresCores, vector<pair<string, pair<string, int>>> ranking); 
+void salvarEditarPerfil(string nomeAtual, string senhaAtual);
 void fecharJogo();
 void validarLogin(string nome, string senha);
-void editarPerfil(string nomeAtual, string senhaAtual);
 void selecionarJogadoresECoresParaPartida();
 
 //inicializacao das telas antes da main 
@@ -27,7 +26,6 @@ void tela_Ranking();
 void tela_HistoricoPartidas();
 void tela_EditarPerfil();
 void tela_Regras();
-
 
 int main() {
 	
@@ -51,26 +49,26 @@ void salvarJogador_txt(string nome, string senha) {
     }
 }
 
-void salvarEstatisticas_txt(){ // nao esquecer de passar os dados como parametros tipo partidas e pontos
-	
- //ofstream arquivo("estatisticas.txt", ios::app);
-	 
-  //    if (arquivo.is_open()) {
-  //       arquivo << "Nome: " << nome << endl;
-  //       arquivo << "Senha: " << senha << endl;
-  //       arquivo.close();
-  //       cout << "Dados salvos com sucesso." << endl;
-  //  } else {
-  //       cout << "Erro ao salvar os dados." << endl;
-  //   }
-	
+void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<string, string>> jogadoresCores, vector<pair<string, pair<string, int>>> ranking) {
+    ofstream arquivo("dadosPartida.txt", ios::app);
+    if (arquivo.is_open()) {
+        arquivo << "Partida " << numeroPartida << " - " << dataHora << " - ";
+        for (const auto& jogadorCor : jogadoresCores) {
+            arquivo << jogadorCor.first << " (" << jogadorCor.second << "), ";
+        }
+        arquivo << "- ";
+        for (const auto& jogadorPontos : ranking) {
+            arquivo << jogadorPontos.first << " (" << jogadorPontos.second.first << " - " << jogadorPontos.second.second << " pontos), ";
+        }
+        arquivo << endl;
+        arquivo.close();
+        cout << "Dados da partida salvos com sucesso." << endl;
+    } else {
+        cout << "Erro ao abrir o arquivo para salvar os dados da partida." << endl;
+    }
 }
 
-void salvarPartida(){                                           
-
-  }
-
- void validarLogin(string nome, string senha) {
+void validarLogin(string nome, string senha) {
 
     ifstream arquivo_jogadores("jogadores.txt", ios::in);
     if (arquivo_jogadores.is_open()) {
@@ -109,7 +107,7 @@ void fecharJogo() {
   
 }
 
-void editarPerfil(string nomeAtual, string senhaAtual) {
+void salvarEditarPerfil(string nomeAtual, string senhaAtual) {
 
     ifstream arquivo_jogadores("jogadores.txt", ios::app);
     ofstream arquivo_temporario("temporario_jogadores.txt");
@@ -131,20 +129,21 @@ void editarPerfil(string nomeAtual, string senhaAtual) {
                 if (senhaAtual == senhaSalva) { // Verificar se a senha atual coincide
                     // Se coincide, solicitar as novas informações e editar o perfil
                     string novoNome, novaSenha;
-                    cout << "Digite seu novo nome: ";
+                    cout << "Digite seu novo nome ou o mesmo nome: ";
                     cin >> novoNome;
-                    cout << "Digite sua nova senha: ";
+                    cout << "Digite sua nova senha ou a mesma senha: ";
                     cin >> novaSenha;
 
                     arquivo_temporario << "Nome: " << novoNome << endl;
                     arquivo_temporario << "Senha: " << novaSenha << endl;
 
                     jogadorEncontrado = true;
-                    // Não é necessário ler mais linhas do arquivo, saia do loop interno
                     break;
                 } else {
                     // Senha atual incorreta, manter os dados originais
                     arquivo_temporario << linha << endl;
+                    cout << " Senha incorreta, por favor tente novamente";
+                    tela_Menu();
                 }
             } else {
                 // Copiar outras linhas do arquivo original para o arquivo temporário
@@ -207,7 +206,6 @@ void selecionarJogadoresECoresParaPartida(){
         // Verificar se o nome está na lista
         auto it = find(nomes.begin(), nomes.end(), nomePesquisado);
         if (it != nomes.end()) {
-
 
             cout << "Jogador " << *it << "encontrado " << endl;
             
@@ -287,7 +285,7 @@ void tela_Menu() {
     cout << "           | Digite 4 para editar seu perfil     |  " << endl;
     cout << "           | Digite 5 para ver as regras do jogo |  " << endl;
     cout << "           | Digite 6 voltar ao login            |  " << endl;
-    cout << "           | Digite 7 para sair do jogo          |  " << endl;
+    cout << "           | Digite 7 para fechar do jogo        |  " << endl;
     cout << "           |_____________________________________|  " << endl;
 
     cin >> opcao_Menu;
@@ -321,7 +319,6 @@ void tela_Menu() {
 	 fecharJogo();
 	}
     else {
-
     cout << "opção invalida, digite novamente";
     tela_Menu();
     }
@@ -394,9 +391,42 @@ void tela_Ranking() {
   //  }
 }
  
-void tela_HistoricoPartidas(){
-   // le o arquivo do historico de partidas e exibe a a lisat dos hotiroco
-   // a 1 coluna da lista é o id da partida, seguido da data e hora da partida e entao os jogadores com suas respectivas cores e o placar da partida 
+void tela_HistoricoPartidas() {
+    system("cls"); // Limpa o console antes de exibir o histórico de partidas
+
+    ifstream arquivo_dadosPartida("dadosPartida.txt");
+    if (arquivo_dadosPartida.is_open()) {
+        cout << "****************** HISTÓRICO DE PARTIDAS ******************" << endl;
+        cout << "Número da Partida\tData e Hora\tJogadores e Cores\tRanking" << endl;
+
+        string linha;
+        while (getline(arquivo_dadosPartida, linha)) {
+            vector<string> partes;
+            size_t pos = 0;
+            string token;
+            while ((pos = linha.find("-")) != string::npos) {
+                token = linha.substr(0, pos);
+                partes.push_back(token);
+                linha.erase(0, pos + 1);
+            }
+            partes.push_back(linha); // Adiciona a última parte
+
+            // Extrair informações da linha
+            string numPartida, dataHora, jogadoresCores, ranking;
+            if (partes.size() >= 4) {
+                numPartida = partes[0];
+                dataHora = partes[1];
+                jogadoresCores = partes[2];
+                ranking = partes[3];
+            }
+
+            // Exibir as informações formatadas na tabela
+            cout << numPartida << "\t" << dataHora << "\t" << jogadoresCores << "\t" << ranking << endl;
+        }
+        arquivo_dadosPartida.close();
+    } else {
+        cout << "Erro ao abrir o arquivo de histórico de partidas." << endl;
+    }
 }
 
 void tela_EditarPerfil() {
@@ -412,7 +442,7 @@ void tela_EditarPerfil() {
     cout << "Digite sua senha de usuario atual: ";
     cin >> senhaAtual;
 
-    editarPerfil(nomeAtual, senhaAtual);
+    salvarEditarPerfil(nomeAtual, senhaAtual);
 
 } 
     
