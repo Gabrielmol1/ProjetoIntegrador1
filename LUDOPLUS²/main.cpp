@@ -8,13 +8,7 @@
 
 using namespace std;
 
-//github
 
-// ahahhahahahaha
-
-// dhhadssahghsag
-
-// inicializacao variaveis globais
 
 time_t tempoInicial;
 
