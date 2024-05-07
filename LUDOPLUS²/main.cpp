@@ -328,7 +328,7 @@ void tela_Login()
     string nome, senha;
 
     cout << "\033[1;31m==============================================\033[0m" << endl;
-    cout << "\033[1;37m             BEM-VINDO AO LUDO PLUS²        \033[0m" << endl;
+    cout << "             BEM-VINDO AO LUDO PLUS              "<< endl;
     cout << "\033[1;31m==============================================\033[0m" << endl;
     cout << "\033[1;37m                                              \033[0m" << endl;
     cout << "\033[1;37m             [1] - FAZER LOGIN              \033[0m" << endl;
@@ -374,7 +374,7 @@ void tela_Menu()
     int opcao_Menu;
 
     cout << "\033[1;31m==============================================\033[0m" << endl;
-    cout << "\033[1;37m                  LUDO PLUS²                  \033[0m" << endl;
+    cout << "\033[1;37m                  LUDO PLUS                  \033[0m" << endl;
     cout << "\033[1;31m==============================================\033[0m" << endl;
     cout << "                                                 " << endl;
     cout << "             1 - Jogar                   " << endl;
@@ -486,7 +486,7 @@ void tela_Jogar()
 
     tempoInicial = time(nullptr);
 
-    cout << "\033[1;31m=========================== TELA DO JOGO ===========================\033[0m" << endl;
+    cout << "\033[1;31m===========================\033[0m TELA DO JOGO \033[1;31m===========================\033[0m" << endl;
 
     cout << "*" << endl;
     cout << "**             |V| | |             **" << endl;
@@ -586,7 +586,7 @@ void tela_Ranking()
 
     system("cls"); // Limpa o console antes de exibir a tela de ranking
 
-    cout << "\033[1;31m============== RANKING ==============\033[0m" << endl;
+    cout << "\033[1;31m==============\033[0m RANKING \033[1;31m==============\033[0m" << endl;
     cout << " AINDA NAO FOI FEITO MANE " << endl;
 
     //  ifstream arquivo_estatisticas("estatisticas.txt");
@@ -608,7 +608,7 @@ void tela_HistoricoPartidas()
     ifstream arquivo_dadosPartida("dadosPartida.txt");
     if (arquivo_dadosPartida.is_open())
     {
-        cout << "\033[1;31m============== HISTORICO DA PARTIDA ==============\033[0m" << endl;
+        cout << "\033[1;31m==============\033[0m HISTORICO DA PARTIDA \033[1;31m==============\033[0m" << endl;
         cout << "Número da Partida\tData e Hora\tJogadores e Cores\tRanking" << endl;
 
         string linha;
@@ -658,7 +658,7 @@ void tela_EditarPerfil()
     {
         string nomeAtual, senhaAtual;
 
-        cout << "\033[1;31m============== EDITAR PERFIL ==============\033[0m" << endl;
+        cout << "\033[1;31m==============\033[0m EDITAR PERFIL \033[1;31m==============\033[0m" << endl;
         cout << "Digite seu nome de usuario atual: ";
         cin >> nomeAtual;
         cout << "Digite sua senha de usuario atual: ";
@@ -755,7 +755,7 @@ void tela_Regras()
 {
     system("cls"); // Limpa o console antes de exibir a tela das regras
 
-    cout << "\033[1;31m============== REGRAS DO JOGO ==============\033[0m" << endl;
+    cout << "\033[1;31m==============\033[0m REGRAS DO JOGO \033[1;31m==============\033[0m" << endl;
     cout << "        1. Regra 1: A primeira pessoa so pode sair da sua casinha se o numero que cair no dado for igual a 1 ou 6.\n"
          << endl;
     cout << "        2. Regra 2: Enquando nao cair 1 ou 6 o jogador nao pode sair de sua casinha com a peca.  \n"
