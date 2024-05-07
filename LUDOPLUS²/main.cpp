@@ -4,9 +4,15 @@
 #include <cstdlib>   // Para usar a função system
 #include <algorithm> // sort e find
 #include <vector>    // usar vetores
-#include <ctime>     // cronometro na tela do jogo
+#include <ctime>     // cronometro n4a tela do jogo
 
 using namespace std;
+
+//github
+
+// ahahhahahahaha
+
+// dhhadssahghsag
 
 // inicializacao variaveis globais
 
