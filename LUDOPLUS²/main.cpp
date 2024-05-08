@@ -8,8 +8,6 @@
 
 using namespace std;
 
-
-
 time_t tempoInicial;
 
 // inicializacao dos metodos em ordem antes da main
@@ -328,7 +326,7 @@ void tela_Login()
     string nome, senha;
 
     cout << "\033[1;31m==============================================\033[0m" << endl;
-    cout << "             BEM-VINDO AO LUDO PLUS              "<< endl;
+    cout << "             BEM-VINDO AO LUDO PLUS              " << endl;
     cout << "\033[1;31m==============================================\033[0m" << endl;
     cout << "\033[1;37m                                              \033[0m" << endl;
     cout << "\033[1;37m             [1] - FAZER LOGIN              \033[0m" << endl;
@@ -392,7 +390,6 @@ void tela_Menu()
     {
         // void selecionarJogadoresECoresParaPartida();
         tela_Jogar();
-
     }
     else if (opcao_Menu == 2)
     {
