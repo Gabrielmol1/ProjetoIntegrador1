@@ -11,6 +11,7 @@ using namespace std;
 time_t tempoInicial;
 
 // inicializacao dos metodos em ordem antes da main
+//teste para apagar comits antigos do github
 
 void salvarJogador_txt(string nome, string senha);
 void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<string, string>> jogadoresCores, vector<pair<string, pair<string, int>>> ranking);
