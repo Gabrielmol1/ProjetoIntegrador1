@@ -18,6 +18,8 @@ void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<stri
 void salvarEditarPerfil(string nomeAtual, string senhaAtual);
 void fecharJogo();
 bool verificarNomeExistente(const string &nome);
+int selecionarQuantidadeJogParaPartida();
+void selecionarJogadoresECoresParaPartida(int num_jogadores);
 void validarLogin(string nome, string senha);
 void selecionarJogadoresECoresParaPartida();
 int rolarDado();
@@ -29,7 +31,7 @@ void tela_Login();
 void tela_Menu();
 void tela_Cadastrar();
 void Tela_Jogar_MostrarTempoNaTela();
-void tela_Jogar();
+void tela_Jogar(const std::vector<std::string>& nomesJogadores, const std::vector<std::string>& coresJogadores);
 void tela_Ranking();
 void tela_HistoricoPartidas();
 void tela_EditarPerfil();
@@ -38,13 +40,11 @@ void tela_Regras();
 
 int main()
 {
-
     tela_Login();
     return 0;
 }
 
-void salvarJogador_txt(string nome, string senha, string perguntaSeguranca, string respostaPergunta)
-{
+void salvarJogador_txt(string nome, string senha, string perguntaSeguranca, string respostaPergunta){
 
     ofstream arquivo("jogadores.txt", ios::app);
 
@@ -55,13 +55,17 @@ void salvarJogador_txt(string nome, string senha, string perguntaSeguranca, stri
         arquivo << "pergunta segurança: " << perguntaSeguranca << endl;
         arquivo << "resposta pergunta: " << respostaPergunta << endl;
         arquivo.close();
+        system("cls");
         cout << "Dados salvos com sucesso." << endl;
-        system("cls"); // Limpa o console antes de exibir a tela de menu
-        tela_Login();  // abre o login se os dados forem salvos corretanente
+        system("pause");
+        tela_Login();
     }
     else
     {
+        system("cls");
         cout << "Erro ao abrir o arquivo para salvar os dados." << endl;
+        system("pause");
+        tela_Login();
     }
 }
 
@@ -82,17 +86,22 @@ void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<stri
         }
         arquivo << endl;
         arquivo.close();
+        system("cls");
         cout << "Dados da partida salvos com sucesso." << endl;
+        system("pause");
+        tela_Menu();
     }
     else
     {
+        system("cls");
         cout << "Erro ao abrir o arquivo para salvar os dados da partida." << endl;
+        system("pause");
+        tela_Menu();
     }
 }
 
 void salvarEditarPerfil(string nomeAtual, string senhaAtual)
 {
-
     ifstream arquivo_jogadores("jogadores.txt", ios::app);
     ofstream arquivo_temporario("temporario_jogadores.txt");
 
@@ -140,8 +149,10 @@ void salvarEditarPerfil(string nomeAtual, string senhaAtual)
                 {
                     // Senha atual incorreta, manter os dados originais
                     arquivo_temporario << linha << endl;
+                    system("cls");
                     cout << " Senha incorreta, por favor tente novamente";
-                    tela_Menu();
+                    system("pause");
+                    tela_EditarPerfil();
                 }
             }
             else
@@ -179,7 +190,6 @@ void fecharJogo()
 
 void validarLogin(string nome, string senha)
 {
-
     ifstream arquivo_jogadores("jogadores.txt", ios::in);
     if (arquivo_jogadores.is_open())
     {
@@ -206,11 +216,11 @@ void validarLogin(string nome, string senha)
         arquivo_jogadores.close();
         if (loginValido)
         {
-
             tela_Menu();
         }
         else
         {
+            system("cls");
             cout << "Nome de usuario ou senha incorretos." << endl;
             system("pause");
             tela_Login();
@@ -218,6 +228,7 @@ void validarLogin(string nome, string senha)
     }
     else
     {
+        system("cls");
         cout << "Erro ao abrir o arquivo de jogadores." << endl;
         fecharJogo();
     }
@@ -225,7 +236,6 @@ void validarLogin(string nome, string senha)
 
 bool verificarNomeExistente(const string &nome)
 {
-
     ifstream arquivo("jogadores.txt");
     string linha;
     while (getline(arquivo, linha))
@@ -243,70 +253,100 @@ bool verificarNomeExistente(const string &nome)
     }
     return false;
 }
-// void selecionarJogadoresECoresParaPartida(){
 
-//     int num_jogadores;
+int selecionarQuantidadeJogParaPartida() {
+    int num_jogadores;
+    do {
+        std::cout << "Digite a quantidade de jogadores (entre 2 e 4): ";
+        std::cin >> num_jogadores;
+        if (num_jogadores < 2 || num_jogadores > 4) {
+            std::cout << "Quantidade de jogadores inválida. Por favor, escolha entre 2 e 4 jogadores.\n";
+        }
+    } while (num_jogadores < 2 || num_jogadores > 4);
+    // Chamando o método selecionarJogadoresECoresParaPartida() com o número de jogadores selecionado
+    selecionarJogadoresECoresParaPartida(num_jogadores);
+}
 
-//     do {
-//         cout << "Quantos jogadores deseja na partida? (Entre 2 e 4): ";
-//         cin >> num_jogadores;
-//         if (num_jogadores < 2 || num_jogadores > 4) {
-//             cout << "Número de jogadores inválido. Por favor, escolha entre 2 e 4 jogadores." << endl;
-//         }
-//     } while (num_jogadores < 2 || num_jogadores > 4);
+void selecionarJogadoresECoresParaPartida(int num_jogadores) {
+    if (num_jogadores < 2 || num_jogadores > 4) {
+        std::cout << "Número de jogadores inválido. Por favor, escolha entre 2 e 4 jogadores.\n";
+        return;
+    }
 
-//     ifstream arquivo_jogadores("jogadores.txt", ios::in);
-//     vector<string> nomes; // Declarar a variável nomes fora do bloco condicional
-//     vector<string> JogadoresSelecionados;
-//     if (arquivo_jogadores.is_open()) {
-//         string linha;
-//         while (getline(arquivo_jogadores, linha)) {
-//             if (linha.find("Nome: ") != string::npos) {
-//                 nomes.push_back(linha.substr(6)); // Adiciona o nome à lista
-//             }
-//         }
-//         arquivo_jogadores.close();
+    std::ifstream arquivo_jogadores("jogadores.txt", std::ios::in);
+    std::vector<std::string> nomes;
+    if (arquivo_jogadores.is_open()) {
+        std::string linha;
+        while (getline(arquivo_jogadores, linha)) {
+            if (linha.find("Nome: ") != std::string::npos) {
+                nomes.push_back(linha.substr(6));
+            }
+        }
+        arquivo_jogadores.close();
 
-//         // Ordenar os nomes em ordem alfabética
-//         sort(nomes.begin(), nomes.end());
+        std::sort(nomes.begin(), nomes.end());
 
-//         cout << "Lista de Jogadores:" << endl;
-//         for (int i = 0; i < nomes.size(); ++i) {
-//             cout << i + 1 << ". " << nomes[i] << endl;
-//         }
+        std::cout << "Lista de Jogadores:\n";
+        for (int i = 0; i < nomes.size(); ++i) {
+            std::cout << i + 1 << ". " << nomes[i] << "\n";
+        }
 
-//         // Permitir pesquisa por nome
-//         string nomePesquisado;
-//         cout << "\nDigite o nome do jogador que deseja selecionar: ";
-//         cin >> nomePesquisado;
+        std::vector<std::string> coresDisponiveis = {"Vermelho", "Verde", "Azul", "Amarelo"};
+        std::vector<std::string> jogadoresSelecionados;
+        std::vector<std::string> coresSelecionadas;
 
-//         // Verificar se o nome está na lista
-//         auto it = find(nomes.begin(), nomes.end(), nomePesquisado);
-//         if (it != nomes.end()) {
+        for (int i = 0; i < num_jogadores; ++i) {
+            std::string nomePesquisado;
+            std::cout << "\nDigite o nome do jogador " << i + 1 << ": ";
+            std::cin >> nomePesquisado;
 
-//             cout << "Jogador " << *it << "encontrado " << endl;
+            auto it = std::find(nomes.begin(), nomes.end(), nomePesquisado);
+            if (it != nomes.end()) {
+                std::cout << "Jogador " << *it << " encontrado.\n";
+                jogadoresSelecionados.push_back(*it);
+                nomes.erase(it);
+            } else {
+                std::cout << "Jogador não encontrado.\n";
+                --i; // Repetir a iteração para permitir que o usuário insira o nome novamente
+            }
+        }
 
-//         } else {
-//             cout << "Jogador não encontrado." << endl;
-//         }
-//     } else {
-//         cout << "Erro ao abrir o arquivo de jogadores." << endl;
-//         return; // Sai do método se houver um erro ao abrir o arquivo
-//     }
+        std::cout << "\nAssocie as cores aos jogadores:\n";
+        for (int i = 0; i < jogadoresSelecionados.size(); ++i) {
+            std::cout << "Escolha a cor para o jogador " << jogadoresSelecionados[i] << ":\n";
 
-//     // O código abaixo será executado somente se o arquivo for aberto com sucesso
-//     int escolha;
-//     cout << "\nSelecione o número correspondente ao jogador que deseja adicionar à partida: ";
-//     cin >> escolha;
+            // Mostrar cores disponíveis
+            std::cout << "Cores disponíveis:\n";
+            for (int j = 0; j < coresDisponiveis.size(); ++j) {
+                std::cout << j + 1 << ". " << coresDisponiveis[j] << "\n";
+            }
 
-//     if (escolha >= 1 && escolha <= nomes.size()) {
-//         string jogadorSelecionado = nomes[escolha - 1];
-//         cout << "Jogador selecionado: " << jogadorSelecionado << endl;
-//         // Aqui você pode realizar alguma ação com o jogador selecionado
-//     } else {
-//         cout << "Opção inválida. Selecione um número válido da lista." << endl;
-//     }
-// }
+            int corEscolhida;
+            do {
+                std::cout << "Escolha a cor digitando o número correspondente: ";
+                std::cin >> corEscolhida;
+
+                // Verificar se a cor escolhida está dentro do intervalo válido
+                if (corEscolhida < 1 || corEscolhida > coresDisponiveis.size()) {
+                    std::cout << "Opção inválida. Por favor, escolha uma cor válida.\n";
+                }
+            } while (corEscolhida < 1 || corEscolhida > coresDisponiveis.size());
+
+            // Adicionar a cor selecionada à lista de cores selecionadas
+            coresSelecionadas.push_back(coresDisponiveis[corEscolhida - 1]);
+
+            // Remover a cor escolhida das cores disponíveis
+            coresDisponiveis.erase(coresDisponiveis.begin() + corEscolhida - 1);
+        }
+
+        // Chamando tela_Jogar() passando os vetores preenchidos
+        tela_Jogar(jogadoresSelecionados, coresSelecionadas);
+    } else {
+        std::cout << "Erro ao abrir o arquivo de jogadores.\n";
+        return;
+    }
+}
+
 
 // Função para rolar o dado
 int rolarDado()
@@ -320,13 +360,9 @@ void moverPeca(int &posicaoAtual, int numRolado)
     posicaoAtual += numRolado; // Move a peça para frente
 }
 
-// ABAIXO DESTE PONTO ESTAO AS TELAS
-
 void tela_Login()
 {
-
     system("cls");
-    system("pause");
     
     string nome, senha;
 
@@ -354,24 +390,20 @@ void tela_Login()
     }
     else if (opcao == 2)
     {
-
         tela_Cadastrar();
     }
     else if (opcao == 4)
     {
-
         tela_RecuperarSenha();
     }
     else
     {
-
         fecharJogo();
     }
 }
 
 void tela_Menu()
 {
-
     system("cls");
 
     int opcao_Menu;
@@ -385,7 +417,7 @@ void tela_Menu()
     cout << "             [3] - Historico das Partidas         " << endl;
     cout << "             [4] - Editar/excluir perfil   " << endl;
     cout << "             [5] - Regras do Jogo   " << endl;
-    cout << "             [6] - Sair             " << endl;
+    cout << "             [6] - voltar ao login             " << endl;
     cout << "                                                 " << endl;
     cout << "\033[1;31m==============================================\033[0m" << endl;
 
@@ -393,35 +425,33 @@ void tela_Menu()
 
     if (opcao_Menu == 1)
     {
-        // void selecionarJogadoresECoresParaPartida();
-        tela_Jogar();
+        selecionarQuantidadeJogParaPartida();
+        //selecionarJogadoresEcores(quantosJogadores);
+        //TelaJogadores(jogdaoresecores);
+        //selecionarJogadoresECoresParaPartida();
+
+        //tela_Jogar();
     }
     else if (opcao_Menu == 2)
     {
-
         tela_Ranking();
     }
     else if (opcao_Menu == 3)
     {
-
         tela_HistoricoPartidas();
     }
     else if (opcao_Menu == 4)
     {
-
         tela_EditarPerfil();
     }
     else if (opcao_Menu == 5)
     {
-
         tela_Regras();
     }
     else if (opcao_Menu == 6)
     {
-
         tela_Login();
     }
-
     else
     {
         cout << "opção invalida, digite novamente";
@@ -431,7 +461,6 @@ void tela_Menu()
 
 void tela_Cadastrar()
 {
-
     system("cls"); // Limpa o console antes de exibir a tela de cadastro
 
     string nome, senha;
@@ -481,9 +510,8 @@ void Tela_Jogar_MostrarTempoNaTela()
          << "TIMER DO JOGO: " << segundosDecorridos << endl;
 }
 
-void tela_Jogar()
+void tela_Jogar(const std::vector<std::string>& nomesJogadores, const std::vector<std::string>& coresJogadores)
 {
-
     system("cls"); // Limpa o console antes de exibir a tela de cadastro
 
     tempoInicial = time(nullptr);
@@ -585,7 +613,6 @@ void tela_Jogar()
 
 void tela_Ranking()
 {
-
     system("cls"); // Limpa o console antes de exibir a tela de ranking
 
     cout << "\033[1;31m==============\033[0m RANKING \033[1;31m==============\033[0m" << endl;
@@ -601,6 +628,21 @@ void tela_Ranking()
     //  } else {
     //       cout << "Erro ao abrir o arquivo de ranking." << endl;
     //  }
+
+    int voltar;
+    cout << "\033[1;31m[1] - Voltar\033[0m" << endl;
+    cin >> voltar;
+
+    if (voltar == 1)
+    {
+        tela_Menu();
+    }
+    else{
+        system("cls");
+        cout << "opcao invalida" << endl;        
+        system("pause");
+        tela_Ranking();
+    }
 }
 
 void tela_HistoricoPartidas()
@@ -644,14 +686,32 @@ void tela_HistoricoPartidas()
     }
     else
     {
-        cout << "Erro ao abrir o arquivo de histórico de partidas." << endl;
+        system("cls");
+        cout << "Erro ao abrir o arquivo de histórico de partidas." << endl;        
+        system("pause");
+        tela_Menu();
+    }
+
+    int voltar;
+    cout << "\033[1;31m[1] - Digite 1 para Voltar\033[0m" << endl;
+    cin >> voltar;
+
+    if (voltar == 1)
+    {
+        tela_Menu();
+    }
+    else{
+        system("cls");
+        cout << "opcao invalida" << endl;        
+        system("pause");
+        tela_HistoricoPartidas();
     }
 }
 
 void tela_EditarPerfil()
 {
+    system("cls");
 
-    system("cls"); // Limpa o console antes de exibir a tela de editarperfil
     int opcao;
     cout << "Digite 1 para editar o perfil\n Digite 2 para voltar ao menu";
     cin >> opcao;
@@ -674,14 +734,16 @@ void tela_EditarPerfil()
     }
     else
     {
-        tela_EditarPerfil();
+        system("cls");
         cout << "Opcao invalida! \nTente novamente.";
+        system("pause");
+        tela_EditarPerfil();
     }
 }
 
 void tela_RecuperarSenha()
 {
-
+    system("cls");
     int opcao;
 
     cout << "Digite 1 para reuperar sua senha \nDigite 2 para voltar a tela de login";
@@ -689,7 +751,6 @@ void tela_RecuperarSenha()
 
     if (opcao == 1)
     {
-
         string nome;
 
         cout << "Digite seu nome de usuario para recuperar a senha: ";
@@ -749,15 +810,12 @@ void tela_RecuperarSenha()
     {
         system("cls");
         cout << "Opcao invalida tente novamente ";
+        system("pause");
         tela_RecuperarSenha();
     }
 }
 
-void tela_Regras()
-{
-
-    int voltar;
-
+void tela_Regras(){
     system("cls"); // Limpa o console antes de exibir a tela das regras
 
     cout << "\033[1;31m==============\033[0m  \033[32m REGRAS DO JOGO \033[0m \033[1;31m==============\033[0m" << endl;
@@ -770,12 +828,18 @@ void tela_Regras()
     cout << "\033[34m 5. Se o jogador cair em uma casinha que possua o simbolo:# ele podera avançar 6 casinhas para frente ou esolher reitar mais umas peça da sua toca.\033[0m" << endl
          << endl;
 
-    cout << "\033[1;31m[1] - Voltar\033[0m" << endl;
+    int voltar;
+    cout << "\033[1;31m[1] - Digite 1 para Voltar\033[0m" << endl;
     cin >> voltar;
 
     if (voltar == 1)
     {
-
         tela_Menu();
+    }
+    else{
+        system("cls");
+        cout << "Opcao invalida tente novamente ";
+        system("pause");
+        tela_Regras();
     }
 }
