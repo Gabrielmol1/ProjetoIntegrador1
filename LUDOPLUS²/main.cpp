@@ -325,6 +325,9 @@ void moverPeca(int &posicaoAtual, int numRolado)
 void tela_Login()
 {
 
+    system("cls");
+    system("pause");
+    
     string nome, senha;
 
     cout << "\033[1;31m==============================================\033[0m" << endl;
