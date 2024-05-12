@@ -1,10 +1,4 @@
 Nome: gabe
 Senha: 1327
-Nome: marcia
-Senha: mol
-Nome: Carlos
-Senha: 123456
-pergunta segurança: nome
-resposta pergunta: carlos
-pergunta segurança: xama
-resposta pergunta: uel
+pergunta: bolo
+resposta: terremoto
