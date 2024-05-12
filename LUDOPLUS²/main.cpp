@@ -767,7 +767,8 @@ void tela_Regras()
     cout << "\033[34m 3. Quando a pessoa sair da casinha ela deve jogar novamente.\033[0m" << endl;
     cout << "\033[34m 4. Se durante a partida o jogador tirar o numero 6 ao rodar o dado ele podera rodar novamente o dado limitado a 3 lances seguidos fora lance o original.\033[0m" << endl
          << endl;
-<<<<<<< HEAD
+    cout << "\033[34m 5. Se o jogador cair em uma casinha que possua o simbolo:# ele podera avançar 6 casinhas para frente ou esolher reitar mais umas peça da sua toca.\033[0m" << endl
+         << endl;
 
     cout << "\033[1;31m[1] - Voltar\033[0m" << endl;
     cin >> voltar;
@@ -778,6 +779,3 @@ void tela_Regras()
         tela_Menu();
     }
 }
-=======
-}
->>>>>>> parent of 97e277e (nem alterei nada)
