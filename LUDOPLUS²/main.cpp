@@ -8,8 +8,6 @@
 
 using namespace std;
 
-
-
 time_t tempoInicial;
 
 // inicializacao dos metodos em ordem antes da main
@@ -213,6 +211,7 @@ void validarLogin(string nome, string senha)
         else
         {
             cout << "Nome de usuario ou senha incorretos." << endl;
+            system("pause");
             tela_Login();
         }
     }
@@ -328,7 +327,7 @@ void tela_Login()
     string nome, senha;
 
     cout << "\033[1;31m==============================================\033[0m" << endl;
-    cout << "             BEM-VINDO AO LUDO PLUS              "<< endl;
+    cout << "             BEM-VINDO AO LUDO PLUS              " << endl;
     cout << "\033[1;31m==============================================\033[0m" << endl;
     cout << "\033[1;37m                                              \033[0m" << endl;
     cout << "\033[1;37m             [1] - FAZER LOGIN              \033[0m" << endl;
@@ -377,12 +376,12 @@ void tela_Menu()
     cout << "\033[1;37m                  LUDO PLUS                  \033[0m" << endl;
     cout << "\033[1;31m==============================================\033[0m" << endl;
     cout << "                                                 " << endl;
-    cout << "             1 - Jogar                   " << endl;
-    cout << "             2 - Ranking           " << endl;
-    cout << "             3 - Historico das Partidas         " << endl;
-    cout << "             4 - Editar/excluir perfil   " << endl;
-    cout << "             5 - Regras do Jogo   " << endl;
-    cout << "             6 - Sair             " << endl;
+    cout << "             [1] - Jogar                   " << endl;
+    cout << "             [2] - Ranking           " << endl;
+    cout << "             [3] - Historico das Partidas         " << endl;
+    cout << "             [4] - Editar/excluir perfil   " << endl;
+    cout << "             [5] - Regras do Jogo   " << endl;
+    cout << "             [6] - Sair             " << endl;
     cout << "                                                 " << endl;
     cout << "\033[1;31m==============================================\033[0m" << endl;
 
@@ -392,7 +391,6 @@ void tela_Menu()
     {
         // void selecionarJogadoresECoresParaPartida();
         tela_Jogar();
-
     }
     else if (opcao_Menu == 2)
     {
@@ -753,15 +751,25 @@ void tela_RecuperarSenha()
 
 void tela_Regras()
 {
+
+    int voltar;
+
     system("cls"); // Limpa o console antes de exibir a tela das regras
 
-    cout << "\033[1;31m==============\033[0m REGRAS DO JOGO \033[1;31m==============\033[0m" << endl;
-    cout << "        1. Regra 1: A primeira pessoa so pode sair da sua casinha se o numero que cair no dado for igual a 1 ou 6.\n"
+    cout << "\033[1;31m==============\033[0m  \033[32m REGRAS DO JOGO \033[0m \033[1;31m==============\033[0m" << endl;
+
+    cout << endl << "\033[34m 1. A primeira pessoa so pode sair da sua casinha se o numero que cair no dado for igual a 1 ou 6.\033[0m" << endl;
+    cout << "\033[34m 2. Enquanto nao cair 1 ou 6 o jogador não pode sair de sua casinha com a peca.\033[0m" << endl;
+    cout << "\033[34m 3. Quando a pessoa sair da casinha ela deve jogar novamente.\033[0m" << endl;
+    cout << "\033[34m 4. Se durante a partida o jogador tirar o numero 6 ao rodar o dado ele podera rodar novamente o dado limitado a 3 lances seguidos fora lance o original.\033[0m" << endl
          << endl;
-    cout << "        2. Regra 2: Enquando nao cair 1 ou 6 o jogador nao pode sair de sua casinha com a peca.  \n"
-         << endl;
-    cout << "        3. Regra 3: Quando a pessoa sair da casinha ela deve jogar novamente.  \n"
-         << endl;
-    cout << "        4. Regra 4: Se durante a partida o jogador tirar o numero 6 ao rodar o dado ele podera rodar novamente o dado limitado a 3 lances seguidos fora lance o original.  \n"
-         << endl;
+
+    cout << "\033[1;31m[1] - Voltar\033[0m" << endl;
+    cin >> voltar;
+
+    if (voltar == 1)
+    {
+
+        tela_Menu();
+    }
 }

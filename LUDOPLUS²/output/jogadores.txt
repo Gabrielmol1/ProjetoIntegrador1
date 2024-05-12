@@ -6,7 +6,5 @@ Nome: Carlos
 Senha: 123456
 pergunta segurança: nome
 resposta pergunta: carlos
-Nome: Guiz�o
-Senha: 123456
 pergunta segurança: xama
 resposta pergunta: uel
