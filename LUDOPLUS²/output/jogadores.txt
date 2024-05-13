@@ -1,5 +1,7 @@
 Nome: gabe
 Senha: 1327
+Pergunta: bolo
+Resposta: terremoto
 pergunta: bolo
 resposta: terremoto
 Nome: bruno
@@ -10,3 +12,7 @@ Nome: carlos
 Senha: 1234
 pergunta: cachorro
 resposta: cleo
+Nome: pedro
+Senha: 23022302
+pergunta segurança: toop
+resposta pergunta: int

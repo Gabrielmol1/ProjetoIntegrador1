@@ -156,6 +156,7 @@ void salvarEditarPerfil(string nomeAtual, string senhaAtual) {
             remove("jogadores.txt");
             rename("temporario_jogadores.txt", "jogadores.txt");
             cout << "Perfil editado com sucesso!" << endl;
+            system("pause");
             tela_Menu();
         } else {
             cout << "Nome de usuário ou senha atual incorretos." << endl;
@@ -179,6 +180,7 @@ void validarLogin(string nome, string senha)
     {
         string linha;
         string nomeSalvo, senhaSalva;
+
         bool loginValido = false;
         while (getline(arquivo_jogadores, linha))
         {
@@ -258,18 +260,18 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
 {
     if (num_jogadores < 2 || num_jogadores > 4)
     {
-        std::cout << "Número de jogadores inválido. Por favor, escolha entre 2 e 4 jogadores.\n";
+        cout << "Número de jogadores inválido. Por favor, escolha entre 2 e 4 jogadores.\n";
         return;
     }
 
-    std::ifstream arquivo_jogadores("jogadores.txt", std::ios::in);
-    std::vector<std::string> nomes;
+    ifstream arquivo_jogadores("jogadores.txt", ios::in);
+    vector<string> nomes;
     if (arquivo_jogadores.is_open())
     {
         std::string linha;
         while (getline(arquivo_jogadores, linha))
         {
-            if (linha.find("Nome: ") != std::string::npos)
+            if (linha.find("Nome: ") != string::npos)
             {
                 nomes.push_back(linha.substr(6));
             }
@@ -284,52 +286,53 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
             std::cout << i + 1 << ". " << nomes[i] << "\n";
         }
 
-        std::vector<std::string> coresDisponiveis = {"Vermelho", "Verde", "Azul", "Amarelo"};
-        std::vector<std::string> jogadoresSelecionados;
-        std::vector<std::string> coresSelecionadas;
+        vector<string> coresDisponiveis = {"Vermelho", "Verde", "Azul", "Amarelo"};
+        vector<string> jogadoresSelecionados;
+        vector<string> coresSelecionadas;
 
         for (int i = 0; i < num_jogadores; ++i)
         {
-            std::string nomePesquisado;
-            std::cout << "\nDigite o nome do jogador " << i + 1 << ": ";
-            std::cin >> nomePesquisado;
+            string nomePesquisado;
+            cout << "\nDigite o nome do jogador " << i + 1 << ": ";
+            cin >> nomePesquisado;
 
             auto it = std::find(nomes.begin(), nomes.end(), nomePesquisado);
             if (it != nomes.end())
             {
-                std::cout << "Jogador " << *it << " encontrado.\n";
+                cout << "Jogador " << *it << " encontrado.\n";
                 jogadoresSelecionados.push_back(*it);
                 nomes.erase(it);
             }
             else
             {
-                std::cout << "Jogador não encontrado.\n";
+                cout << "Jogador não encontrado.\n";
                 --i; // Repetir a iteração para permitir que o usuário insira o nome novamente
             }
         }
 
-        std::cout << "\nAssocie as cores aos jogadores:\n";
+        cout << "\nAssocie as cores aos jogadores:\n";
         for (int i = 0; i < jogadoresSelecionados.size(); ++i)
         {
-            std::cout << "Escolha a cor para o jogador " << jogadoresSelecionados[i] << ":\n";
+            cout << "Escolha a cor para o jogador " << jogadoresSelecionados[i] << ":\n";
 
             // Mostrar cores disponíveis
-            std::cout << "Cores disponíveis:\n";
+            cout << "Cores disponíveis:\n";
             for (int j = 0; j < coresDisponiveis.size(); ++j)
             {
-                std::cout << j + 1 << ". " << coresDisponiveis[j] << "\n";
+                cout << j + 1 << ". " << coresDisponiveis[j] << "\n";
             }
 
             int corEscolhida;
             do
             {
-                std::cout << "Escolha a cor digitando o número correspondente: ";
-                std::cin >> corEscolhida;
+                cout << "Escolha a cor digitando o número correspondente: ";
+                cin >> corEscolhida;
 
                 // Verificar se a cor escolhida está dentro do intervalo válido
                 if (corEscolhida < 1 || corEscolhida > coresDisponiveis.size())
                 {
-                    std::cout << "Opção inválida. Por favor, escolha uma cor válida.\n";
+                    ::cout << "Opção inválida. Por favor, escolha uma cor válida.\n";
+                    --i;
                 }
             } while (corEscolhida < 1 || corEscolhida > coresDisponiveis.size());
 
@@ -345,7 +348,7 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
     }
     else
     {
-        std::cout << "Erro ao abrir o arquivo de jogadores.\n";
+        cout << "Erro ao abrir o arquivo de jogadores.\n";
         return;
     }
 }
@@ -794,13 +797,6 @@ void tela_RecuperarSenha() {
             }
 
             arquivo_jogadores.close();
-
-            if (!nomeEncontrado) {
-                cout << "Nome de usuário não encontrado." << endl;
-                tela_Menu();
-            }
-        } else {
-            cout << "Erro ao abrir o arquivo de jogadores." << endl;
         }
     } else if (opcao == 2) {
         tela_Login();
