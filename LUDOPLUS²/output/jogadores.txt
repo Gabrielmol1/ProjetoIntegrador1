@@ -2,3 +2,11 @@ Nome: gabe
 Senha: 1327
 pergunta: bolo
 resposta: terremoto
+Nome: bruno
+Senha: 1234
+pergunta: nome
+resposta: bruno
+Nome: carlos
+Senha: 1234
+pergunta: cachorro
+resposta: cleo
