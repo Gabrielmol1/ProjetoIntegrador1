@@ -100,25 +100,32 @@ void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<stri
     }
 }
 
-void salvarEditarPerfil(string nomeAtual, string senhaAtual) {
+void salvarEditarPerfil(string nomeAtual, string senhaAtual)
+{
     ifstream arquivo_jogadores("jogadores.txt");
     ofstream arquivo_temporario("temporario_jogadores.txt");
 
-    if (arquivo_jogadores.is_open() && arquivo_temporario.is_open()) {
+    if (arquivo_jogadores.is_open() && arquivo_temporario.is_open())
+    {
         string linha;
         bool jogadorEncontrado = false;
 
-        while (getline(arquivo_jogadores, linha)) {
-            if (linha.find("Nome: ") != string::npos && linha.find(nomeAtual) != string::npos) {
+        while (getline(arquivo_jogadores, linha))
+        {
+            if (linha.find("Nome: ") != string::npos && linha.find(nomeAtual) != string::npos)
+            {
                 string senhaSalva = ""; // Variável para armazenar a senha salva do usuário
                 // Encontrou o jogador a ser editado, verificar a senha
-                while (getline(arquivo_jogadores, linha)) {
-                    if (linha.find("Senha: ") != string::npos) {
+                while (getline(arquivo_jogadores, linha))
+                {
+                    if (linha.find("Senha: ") != string::npos)
+                    {
                         senhaSalva = linha.substr(7); // Obter a senha salva do arquivo
                         break;
                     }
                 }
-                if (senhaAtual == senhaSalva) { // Verificar se a senha atual coincide
+                if (senhaAtual == senhaSalva)
+                { // Verificar se a senha atual coincide
                     // Se coincide, solicitar as novas informações e editar o perfil
                     string novoNome, novaSenha, NovaPerguntaSeguranca, novaRespostaPergunta;
                     cout << "Digite seu novo nome ou o mesmo nome: ";
@@ -136,14 +143,18 @@ void salvarEditarPerfil(string nomeAtual, string senhaAtual) {
                     arquivo_temporario << "Resposta: " << novaRespostaPergunta << endl;
 
                     jogadorEncontrado = true;
-                } else {
+                }
+                else
+                {
                     // Senha atual incorreta, manter os dados originais
                     arquivo_temporario << linha << endl;
                     cout << "Senha incorreta, por favor tente novamente" << endl;
                     jogadorEncontrado = false;
                     break; // Saia do loop ao encontrar uma senha incorreta
                 }
-            } else {
+            }
+            else
+            {
                 // Copiar outras linhas do arquivo original para o arquivo temporário
                 arquivo_temporario << linha << endl;
             }
@@ -152,18 +163,23 @@ void salvarEditarPerfil(string nomeAtual, string senhaAtual) {
         arquivo_jogadores.close();
         arquivo_temporario.close();
 
-        if (jogadorEncontrado) {
+        if (jogadorEncontrado)
+        {
             remove("jogadores.txt");
             rename("temporario_jogadores.txt", "jogadores.txt");
             cout << "Perfil editado com sucesso!" << endl;
             system("pause");
             tela_Menu();
-        } else {
+        }
+        else
+        {
             cout << "Nome de usuário ou senha atual incorretos." << endl;
             // Permitir que o usuário tente novamente
             tela_EditarPerfil();
         }
-    } else {
+    }
+    else
+    {
         cout << "Erro ao abrir os arquivos." << endl;
     }
 }
@@ -245,11 +261,11 @@ int selecionarQuantidadeJogParaPartida()
     int num_jogadores;
     do
     {
-        std::cout << "Digite a quantidade de jogadores (entre 2 e 4): ";
-        std::cin >> num_jogadores;
+        cout << "Digite a quantidade de jogadores (entre 2 e 4): ";
+        cin >> num_jogadores;
         if (num_jogadores < 2 || num_jogadores > 4)
         {
-            std::cout << "Quantidade de jogadores inválida. Por favor, escolha entre 2 e 4 jogadores.\n";
+            cout << "Quantidade de jogadores inválida. Por favor, escolha entre 2 e 4 jogadores.\n";
         }
     } while (num_jogadores < 2 || num_jogadores > 4);
     // Chamando o método selecionarJogadoresECoresParaPartida() com o número de jogadores selecionado
@@ -258,6 +274,9 @@ int selecionarQuantidadeJogParaPartida()
 
 void selecionarJogadoresECoresParaPartida(int num_jogadores)
 {
+
+    system("cls");
+
     if (num_jogadores < 2 || num_jogadores > 4)
     {
         cout << "Número de jogadores inválido. Por favor, escolha entre 2 e 4 jogadores.\n";
@@ -268,7 +287,7 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
     vector<string> nomes;
     if (arquivo_jogadores.is_open())
     {
-        std::string linha;
+        string linha;
         while (getline(arquivo_jogadores, linha))
         {
             if (linha.find("Nome: ") != string::npos)
@@ -278,15 +297,21 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
         }
         arquivo_jogadores.close();
 
-        std::sort(nomes.begin(), nomes.end());
+        sort(nomes.begin(), nomes.end());
 
-        std::cout << "Lista de Jogadores:\n";
+        cout << "Lista de Jogadores:\n";
         for (int i = 0; i < nomes.size(); ++i)
         {
-            std::cout << i + 1 << ". " << nomes[i] << "\n";
+            cout << i + 1 << ". " << nomes[i] << "\n";
         }
 
-        vector<string> coresDisponiveis = {"Vermelho", "Verde", "Azul", "Amarelo"};
+        vector<string> coresDisponiveis = {
+            "\033[31mVermelho\033[0m",
+            "\033[32mVerde\033[0m",
+            "\033[34mAzul\033[0m",
+            "\033[33mAmarelo\033[0m"
+        };
+
         vector<string> jogadoresSelecionados;
         vector<string> coresSelecionadas;
 
@@ -296,7 +321,7 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
             cout << "\nDigite o nome do jogador " << i + 1 << ": ";
             cin >> nomePesquisado;
 
-            auto it = std::find(nomes.begin(), nomes.end(), nomePesquisado);
+            auto it = find(nomes.begin(), nomes.end(), nomePesquisado);
             if (it != nomes.end())
             {
                 cout << "Jogador " << *it << " encontrado.\n";
@@ -325,7 +350,7 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
             int corEscolhida;
             do
             {
-                cout << "Escolha a cor digitando o número correspondente: ";
+                cout << "Selecione o numero da sua cor: ";
                 cin >> corEscolhida;
 
                 // Verificar se a cor escolhida está dentro do intervalo válido
@@ -747,29 +772,34 @@ void tela_EditarPerfil()
     }
 }
 
-void tela_RecuperarSenha() {
+void tela_RecuperarSenha()
+{
     system("cls");
     int opcao;
 
     cout << "Digite 1 para recuperar sua senha\nDigite 2 para voltar à tela de login: ";
     cin >> opcao;
 
-    if (opcao == 1) {
+    if (opcao == 1)
+    {
         string nome;
 
         cout << "Digite seu nome de usuário para recuperar a senha: ";
         cin >> nome;
 
         ifstream arquivo_jogadores("jogadores.txt", ios::in);
-        if (arquivo_jogadores.is_open()) {
+        if (arquivo_jogadores.is_open())
+        {
             string linha;
             bool nomeEncontrado = false;
 
-            while (getline(arquivo_jogadores, linha)) {
-                if (linha.find("Nome: " + nome) != string::npos) {
+            while (getline(arquivo_jogadores, linha))
+            {
+                if (linha.find("Nome: " + nome) != string::npos)
+                {
                     // Encontrou o nome de usuário, agora exibe a pergunta correspondente
-                    getline(arquivo_jogadores, linha); // Pula linha da senha
-                    getline(arquivo_jogadores, linha); // Pula linha da pergunta
+                    getline(arquivo_jogadores, linha);                             // Pula linha da senha
+                    getline(arquivo_jogadores, linha);                             // Pula linha da pergunta
                     cout << "Pergunta de seguranca: " << linha.substr(10) << endl; // Exibe a pergunta
 
                     string perguntaSalva = linha.substr(10); // Salva a pergunta para comparação posterior
@@ -780,16 +810,21 @@ void tela_RecuperarSenha() {
                     cin >> resposta;
 
                     // Verifica se a resposta está correta
-                    if (resposta == "resposta_correta") {
+                    if (resposta == "resposta_correta")
+                    {
                         // Se a resposta estiver correta, encontra a linha da senha e exibe a senha correspondente
-                        while (getline(arquivo_jogadores, linha)) {
-                            if (linha.find("Senha: ") != string::npos) {
+                        while (getline(arquivo_jogadores, linha))
+                        {
+                            if (linha.find("Senha: ") != string::npos)
+                            {
                                 cout << "Sua senha é: " << linha.substr(7) << endl;
                                 nomeEncontrado = true;
                                 break;
                             }
                         }
-                    } else {
+                    }
+                    else
+                    {
                         cout << "Resposta incorreta." << endl;
                     }
                     break; // Sai do loop ao encontrar o nome de usuário
@@ -798,16 +833,19 @@ void tela_RecuperarSenha() {
 
             arquivo_jogadores.close();
         }
-    } else if (opcao == 2) {
+    }
+    else if (opcao == 2)
+    {
         tela_Login();
-    } else {
+    }
+    else
+    {
         system("cls");
         cout << "Opção inválida. Tente novamente." << endl;
         system("pause");
         tela_RecuperarSenha();
     }
 }
-
 
 void tela_Regras()
 {
