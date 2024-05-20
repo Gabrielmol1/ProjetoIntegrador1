@@ -131,7 +131,7 @@ void salvarEditarPerfil(string nomeAtual, string senhaAtual)
                     else if (linha.find("Resposta: ") != string::npos)
                     {
                         respostaSalva = linha.substr(10); // Obter a resposta salva do arquivo
-                        break; // Parar ao encontrar a resposta da pergunta
+                        break;                            // Parar ao encontrar a resposta da pergunta
                     }
                 }
                 if (senhaAtual == senhaSalva)
@@ -279,7 +279,7 @@ int selecionarQuantidadeJogParaPartida()
         cin >> num_jogadores;
         if (num_jogadores < 2 || num_jogadores > 4)
         {
-            cout << "Quantidade de jogadores inválida. Por favor, escolha entre 2 e 4 jogadores.\n";
+            cout << "Quantidade de jogadores invalida. Por favor, escolha entre 2 e 4 jogadores.\n";
         }
     } while (num_jogadores < 2 || num_jogadores > 4);
     // Chamando o método selecionarJogadoresECoresParaPartida() com o número de jogadores selecionado
@@ -293,7 +293,7 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
 
     if (num_jogadores < 2 || num_jogadores > 4)
     {
-        cout << "Número de jogadores inválido. Por favor, escolha entre 2 e 4 jogadores.\n";
+        cout << "Numero de jogadores invalido. Por favor, escolha entre 2 e 4 jogadores.\n";
         return;
     }
 
@@ -323,8 +323,7 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
             "\033[31mVermelho\033[0m",
             "\033[32mVerde\033[0m",
             "\033[34mAzul\033[0m",
-            "\033[33mAmarelo\033[0m"
-        };
+            "\033[33mAmarelo\033[0m"};
 
         vector<string> jogadoresSelecionados;
         vector<string> coresSelecionadas;
@@ -344,7 +343,7 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
             }
             else
             {
-                cout << "Jogador não encontrado.\n";
+                cout << "Jogador nao encontrado.\n";
                 --i; // Repetir a iteração para permitir que o usuário insira o nome novamente
             }
         }
@@ -352,10 +351,13 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
         cout << "\nAssocie as cores aos jogadores:\n";
         for (int i = 0; i < jogadoresSelecionados.size(); ++i)
         {
+
+            system("cls");
+
             cout << "Escolha a cor para o jogador " << jogadoresSelecionados[i] << ":\n";
 
             // Mostrar cores disponíveis
-            cout << "Cores disponíveis:\n";
+            cout << "Cores disponiveis:\n";
             for (int j = 0; j < coresDisponiveis.size(); ++j)
             {
                 cout << j + 1 << ". " << coresDisponiveis[j] << "\n";
@@ -370,7 +372,7 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
                 // Verificar se a cor escolhida está dentro do intervalo válido
                 if (corEscolhida < 1 || corEscolhida > coresDisponiveis.size())
                 {
-                    ::cout << "Opção inválida. Por favor, escolha uma cor válida.\n";
+                    ::cout << "Opção invalida. Por favor, escolha uma cor valida.\n";
                     --i;
                 }
             } while (corEscolhida < 1 || corEscolhida > coresDisponiveis.size());
@@ -460,7 +462,7 @@ void tela_Menu()
     int opcao_Menu;
 
     cout << "\033[1;31m==============================================\033[0m" << endl;
-    cout << "\033[1;37m                  LUDO PLUS                  \033[0m" << endl;
+    cout << "                  LUDO PLUS                  " << endl;
     cout << "\033[1;31m==============================================\033[0m" << endl;
     cout << "                                                 " << endl;
     cout << "             [1] - Jogar                   " << endl;
@@ -785,41 +787,46 @@ void tela_EditarPerfil()
     }
     else
     {
-        
+
         cout << "Opcao invalida. Tente novamente." << endl;
         tela_EditarPerfil();
     }
 }
 
-void tela_RecuperarSenha() {
+void tela_RecuperarSenha()
+{
     system("cls");
     int opcao;
 
     cout << "\033Digite 1 para recuperar sua senha\nDigite 2 para voltar a tela de login\nOpcao: \033";
     cin >> opcao;
 
-    if (opcao == 1) {
+    if (opcao == 1)
+    {
         string nome;
 
         cout << "Digite seu nome de usuario para recuperar a senha: ";
         cin >> nome;
 
         ifstream arquivo_jogadores("jogadores.txt", ios::in);
-        if (arquivo_jogadores.is_open()) {
+        if (arquivo_jogadores.is_open())
+        {
             string linha;
             bool nomeEncontrado = false;
 
-            while (getline(arquivo_jogadores, linha)) {
-                if (linha.find("Nome: " + nome) != string::npos) {
+            while (getline(arquivo_jogadores, linha))
+            {
+                if (linha.find("Nome: " + nome) != string::npos)
+                {
                     // Encontrou o nome de usuário, agora lê as linhas seguintes
-                    getline(arquivo_jogadores, linha); // Lê a linha da senha
+                    getline(arquivo_jogadores, linha);   // Lê a linha da senha
                     string senhaSalva = linha.substr(7); // Extrai a senha
 
-                    getline(arquivo_jogadores, linha); // Lê a linha da pergunta
+                    getline(arquivo_jogadores, linha);       // Lê a linha da pergunta
                     string perguntaSalva = linha.substr(10); // Extrai a pergunta
                     cout << "Pergunta de seguranca: " << perguntaSalva << endl;
 
-                    getline(arquivo_jogadores, linha); // Lê a linha da resposta
+                    getline(arquivo_jogadores, linha);       // Lê a linha da resposta
                     string respostaSalva = linha.substr(10); // Extrai a resposta
 
                     // Lê a resposta do usuário para a pergunta de segurança
@@ -828,27 +835,37 @@ void tela_RecuperarSenha() {
                     cin >> resposta;
 
                     // Verifica se a resposta está correta
-                    if (resposta == respostaSalva) {
+                    if (resposta == respostaSalva)
+                    {
                         cout << "Sua senha e: " << senhaSalva << endl;
                         nomeEncontrado = true;
-                    } else {
+                    }
+                    else
+                    {
                         cout << "Resposta incorreta." << endl;
                     }
                     break; // Sai do loop ao encontrar o nome de usuário
                 }
             }
 
-            if (!nomeEncontrado) {
+            if (!nomeEncontrado)
+            {
                 cout << "Nome de usuario nao encontrado." << endl;
             }
 
             arquivo_jogadores.close();
-        } else {
+        }
+        else
+        {
             cout << "Nao foi possivel abrir o arquivo de jogadores." << endl;
         }
-    } else if (opcao == 2) {
+    }
+    else if (opcao == 2)
+    {
         tela_Login();
-    } else {
+    }
+    else
+    {
         system("cls");
         cout << "Opcao invalida. Tente novamente." << endl;
         system("pause");
@@ -860,11 +877,12 @@ void tela_Regras()
 {
     system("cls"); // Limpa o console antes de exibir a tela das regras
 
-    cout << "\033[1;31m==============\033[0m  \033[32m REGRAS DO JOGO \033[0m \033[1;31m==============\033[0m" << endl << endl;
+    cout << "\033[1;31m==============\033[0m  \033[32m REGRAS DO JOGO \033[0m \033[1;31m==============\033[0m" << endl
+         << endl;
     cout << "\033[34m 1. A primeira pessoa so pode sair da sua casinha se o numero que cair no dado for igual a 1 ou 6.\033[0m" << endl;
     cout << "\033[34m 2. Enquanto nao cair 1 ou 6 o jogador não pode sair de sua casinha com a peca.\033[0m" << endl;
     cout << "\033[34m 3. Quando a pessoa sair da casinha ela deve jogar novamente.\033[0m" << endl;
-    cout << "\033[34m 4. Se durante a partida o jogador tirar o numero 6 ao rodar o dado ele podera rodar novamente o dado limitado a 3 lances seguidos fora lance o original.\033[0m"<< endl;
+    cout << "\033[34m 4. Se durante a partida o jogador tirar o numero 6 ao rodar o dado ele podera rodar novamente o dado limitado a 3 lances seguidos fora lance o original.\033[0m" << endl;
     cout << "\033[34m 5. Se o jogador cair em uma casinha que possua o simbolo:# ele podera avançar 6 casinhas para frente ou esolher reitar mais umas peça da sua toca.\033[0m" << endl;
 
     int voltar;
@@ -878,7 +896,7 @@ void tela_Regras()
     else
     {
         system("cls");
-        cout << "Opcao invalida! tente novamente "<< endl;
+        cout << "Opcao invalida! tente novamente " << endl;
         system("pause");
         tela_Regras();
     }
