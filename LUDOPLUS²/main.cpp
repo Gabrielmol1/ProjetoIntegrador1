@@ -115,13 +115,23 @@ void salvarEditarPerfil(string nomeAtual, string senhaAtual)
             if (linha.find("Nome: ") != string::npos && linha.find(nomeAtual) != string::npos)
             {
                 string senhaSalva = ""; // Variável para armazenar a senha salva do usuário
+                string perguntaSalva = "";
+                string respostaSalva = "";
                 // Encontrou o jogador a ser editado, verificar a senha
                 while (getline(arquivo_jogadores, linha))
                 {
                     if (linha.find("Senha: ") != string::npos)
                     {
                         senhaSalva = linha.substr(7); // Obter a senha salva do arquivo
-                        break;
+                    }
+                    else if (linha.find("Pergunta: ") != string::npos)
+                    {
+                        perguntaSalva = linha.substr(10); // Obter a pergunta salva do arquivo
+                    }
+                    else if (linha.find("Resposta: ") != string::npos)
+                    {
+                        respostaSalva = linha.substr(10); // Obter a resposta salva do arquivo
+                        break; // Parar ao encontrar a resposta da pergunta
                     }
                 }
                 if (senhaAtual == senhaSalva)
@@ -132,9 +142,9 @@ void salvarEditarPerfil(string nomeAtual, string senhaAtual)
                     cin >> novoNome;
                     cout << "Digite sua nova senha ou a mesma senha: ";
                     cin >> novaSenha;
-                    cout << "Digite sua nova pergunta de segurança ou a mesma nova pergunta de seguranca: ";
+                    cout << "Digite sua nova pergunta de seguranca ou a mesma nova pergunta de seguranca: ";
                     cin >> NovaPerguntaSeguranca;
-                    cout << "Digite sua nova nova resposta de segurança ou a mesma resposta de seguranca: ";
+                    cout << "Digite sua nova nova resposta de seguranca ou a mesma resposta de seguranca: ";
                     cin >> novaRespostaPergunta;
 
                     arquivo_temporario << "Nome: " << novoNome << endl;
@@ -173,14 +183,18 @@ void salvarEditarPerfil(string nomeAtual, string senhaAtual)
         }
         else
         {
-            cout << "Nome de usuário ou senha atual incorretos." << endl;
-            // Permitir que o usuário tente novamente
+            system("cls");
+            cout << "Jogador nao encontrado" << endl;
+            system("pause");
             tela_EditarPerfil();
         }
     }
     else
     {
+        system("cls");
         cout << "Erro ao abrir os arquivos." << endl;
+        system("pause");
+        tela_Menu();
     }
 }
 
@@ -422,13 +436,20 @@ void tela_Login()
     {
         tela_Cadastrar();
     }
+    else if (opcao == 3)
+    {
+        fecharJogo();
+    }
     else if (opcao == 4)
     {
         tela_RecuperarSenha();
     }
     else
     {
-        fecharJogo();
+        system("cls");
+        cout << "Opcao invalida! \nTente Novamente ";
+        system("pause");
+        tela_Login();
     }
 }
 
@@ -659,7 +680,7 @@ void tela_Ranking()
     //  }
 
     int voltar;
-    cout << "\033[1;31m[1] - Voltar\033[0m" << endl;
+    cout << "\033[1;31m[1] - Digite 1 para Voltar\nOpcao: \033[0m" << endl;
     cin >> voltar;
 
     if (voltar == 1)
@@ -723,7 +744,7 @@ void tela_HistoricoPartidas()
     }
 
     int voltar;
-    cout << "\033[1;31m[1] - Digite 1 para Voltar\033[0m" << endl;
+    cout << "\033[1;31m[1] - Digite 1 para Voltar\nOpcao: \033[0m" << endl;
     cin >> voltar;
 
     if (voltar == 1)
@@ -741,10 +762,9 @@ void tela_HistoricoPartidas()
 
 void tela_EditarPerfil()
 {
-    system("cls");
 
     int opcao;
-    cout << "Digite 1 para editar o perfil\nDigite 2 para voltar ao menu";
+    cout << "\033Digite 1 para editar o perfil\nDigite 2 para voltar ao menu\nOpcao: \033";
     cin >> opcao;
 
     if (opcao == 1)
@@ -765,83 +785,72 @@ void tela_EditarPerfil()
     }
     else
     {
-        system("cls");
-        cout << "Opcao invalida! \nTente novamente." << endl;
-        system("pause");
+        
+        cout << "Opcao invalida. Tente novamente." << endl;
         tela_EditarPerfil();
     }
 }
 
-void tela_RecuperarSenha()
-{
+void tela_RecuperarSenha() {
     system("cls");
     int opcao;
 
-    cout << "Digite 1 para recuperar sua senha\nDigite 2 para voltar à tela de login: ";
+    cout << "\033Digite 1 para recuperar sua senha\nDigite 2 para voltar a tela de login\nOpcao: \033";
     cin >> opcao;
 
-    if (opcao == 1)
-    {
+    if (opcao == 1) {
         string nome;
 
-        cout << "Digite seu nome de usuário para recuperar a senha: ";
+        cout << "Digite seu nome de usuario para recuperar a senha: ";
         cin >> nome;
 
         ifstream arquivo_jogadores("jogadores.txt", ios::in);
-        if (arquivo_jogadores.is_open())
-        {
+        if (arquivo_jogadores.is_open()) {
             string linha;
             bool nomeEncontrado = false;
 
-            while (getline(arquivo_jogadores, linha))
-            {
-                if (linha.find("Nome: " + nome) != string::npos)
-                {
-                    // Encontrou o nome de usuário, agora exibe a pergunta correspondente
-                    getline(arquivo_jogadores, linha);                             // Pula linha da senha
-                    getline(arquivo_jogadores, linha);                             // Pula linha da pergunta
-                    cout << "Pergunta de seguranca: " << linha.substr(10) << endl; // Exibe a pergunta
+            while (getline(arquivo_jogadores, linha)) {
+                if (linha.find("Nome: " + nome) != string::npos) {
+                    // Encontrou o nome de usuário, agora lê as linhas seguintes
+                    getline(arquivo_jogadores, linha); // Lê a linha da senha
+                    string senhaSalva = linha.substr(7); // Extrai a senha
 
-                    string perguntaSalva = linha.substr(10); // Salva a pergunta para comparação posterior
+                    getline(arquivo_jogadores, linha); // Lê a linha da pergunta
+                    string perguntaSalva = linha.substr(10); // Extrai a pergunta
+                    cout << "Pergunta de seguranca: " << perguntaSalva << endl;
 
-                    // Lê a resposta da pergunta
+                    getline(arquivo_jogadores, linha); // Lê a linha da resposta
+                    string respostaSalva = linha.substr(10); // Extrai a resposta
+
+                    // Lê a resposta do usuário para a pergunta de segurança
                     string resposta;
                     cout << "Digite a resposta da pergunta de seguranca: ";
                     cin >> resposta;
 
                     // Verifica se a resposta está correta
-                    if (resposta == "resposta_correta")
-                    {
-                        // Se a resposta estiver correta, encontra a linha da senha e exibe a senha correspondente
-                        while (getline(arquivo_jogadores, linha))
-                        {
-                            if (linha.find("Senha: ") != string::npos)
-                            {
-                                cout << "Sua senha é: " << linha.substr(7) << endl;
-                                nomeEncontrado = true;
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
+                    if (resposta == respostaSalva) {
+                        cout << "Sua senha e: " << senhaSalva << endl;
+                        nomeEncontrado = true;
+                    } else {
                         cout << "Resposta incorreta." << endl;
                     }
                     break; // Sai do loop ao encontrar o nome de usuário
                 }
             }
 
+            if (!nomeEncontrado) {
+                cout << "Nome de usuario nao encontrado." << endl;
+            }
+
             arquivo_jogadores.close();
+        } else {
+            cout << "Nao foi possivel abrir o arquivo de jogadores." << endl;
         }
-    }
-    else if (opcao == 2)
-    {
+    } else if (opcao == 2) {
         tela_Login();
-    }
-    else
-    {
+    } else {
         system("cls");
-        cout << "Opção inválida. Tente novamente." << endl;
+        cout << "Opcao invalida. Tente novamente." << endl;
         system("pause");
         tela_RecuperarSenha();
     }
@@ -851,19 +860,15 @@ void tela_Regras()
 {
     system("cls"); // Limpa o console antes de exibir a tela das regras
 
-    cout << "\033[1;31m==============\033[0m  \033[32m REGRAS DO JOGO \033[0m \033[1;31m==============\033[0m" << endl;
-
-    cout << endl
-         << "\033[34m 1. A primeira pessoa so pode sair da sua casinha se o numero que cair no dado for igual a 1 ou 6.\033[0m" << endl;
+    cout << "\033[1;31m==============\033[0m  \033[32m REGRAS DO JOGO \033[0m \033[1;31m==============\033[0m" << endl << endl;
+    cout << "\033[34m 1. A primeira pessoa so pode sair da sua casinha se o numero que cair no dado for igual a 1 ou 6.\033[0m" << endl;
     cout << "\033[34m 2. Enquanto nao cair 1 ou 6 o jogador não pode sair de sua casinha com a peca.\033[0m" << endl;
     cout << "\033[34m 3. Quando a pessoa sair da casinha ela deve jogar novamente.\033[0m" << endl;
-    cout << "\033[34m 4. Se durante a partida o jogador tirar o numero 6 ao rodar o dado ele podera rodar novamente o dado limitado a 3 lances seguidos fora lance o original.\033[0m" << endl
-         << endl;
-    cout << "\033[34m 5. Se o jogador cair em uma casinha que possua o simbolo:# ele podera avançar 6 casinhas para frente ou esolher reitar mais umas peça da sua toca.\033[0m" << endl
-         << endl;
+    cout << "\033[34m 4. Se durante a partida o jogador tirar o numero 6 ao rodar o dado ele podera rodar novamente o dado limitado a 3 lances seguidos fora lance o original.\033[0m"<< endl;
+    cout << "\033[34m 5. Se o jogador cair em uma casinha que possua o simbolo:# ele podera avançar 6 casinhas para frente ou esolher reitar mais umas peça da sua toca.\033[0m" << endl;
 
     int voltar;
-    cout << "\033[1;31m[1] - Digite 1 para Voltar\033[0m" << endl;
+    cout << "\033[1;31m[1] - Digite 1 para Voltar\nOpcao: \033[0m" << endl;
     cin >> voltar;
 
     if (voltar == 1)
@@ -873,7 +878,7 @@ void tela_Regras()
     else
     {
         system("cls");
-        cout << "Opcao invalida tente novamente ";
+        cout << "Opcao invalida! tente novamente "<< endl;
         system("pause");
         tela_Regras();
     }

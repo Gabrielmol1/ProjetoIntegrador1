@@ -2,8 +2,6 @@ Nome: gabe
 Senha: 1327
 Pergunta: bolo
 Resposta: terremoto
-pergunta: bolo
-resposta: terremoto
 Nome: bruno
 Senha: 1234
 pergunta: nome
