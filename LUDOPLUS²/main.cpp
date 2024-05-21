@@ -5,6 +5,8 @@
 #include <algorithm> // sort e find
 #include <vector>    // usar vetores
 #include <ctime>     // cronometro n4a tela do jogo
+#include <unistd.h>  // Para a função sleep
+#include <unordered_map>
 
 using namespace std;
 
@@ -286,10 +288,26 @@ int selecionarQuantidadeJogParaPartida()
     selecionarJogadoresECoresParaPartida(num_jogadores);
 }
 
+void limparTela()
+{
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
+string trim(const string &str)
+{
+    size_t first = str.find_first_not_of(' ');
+    size_t last = str.find_last_not_of(' ');
+    return str.substr(first, (last - first + 1));
+}
+
 void selecionarJogadoresECoresParaPartida(int num_jogadores)
 {
 
-    system("cls");
+    limparTela();
 
     if (num_jogadores < 2 || num_jogadores > 4)
     {
@@ -298,7 +316,8 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
     }
 
     ifstream arquivo_jogadores("jogadores.txt", ios::in);
-    vector<string> nomes;
+    vector<pair<string, string>> jogadores;
+
     if (arquivo_jogadores.is_open())
     {
         string linha;
@@ -306,17 +325,21 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
         {
             if (linha.find("Nome: ") != string::npos)
             {
-                nomes.push_back(linha.substr(6));
+                size_t posNome = linha.find("Nome: ") + 6;
+                size_t posSenha = linha.find(", Senha: ");
+                string nome = trim(linha.substr(posNome, posSenha - posNome));
+                string senha = trim(linha.substr(posSenha + 9));
+                jogadores.push_back(make_pair(nome, senha));
             }
         }
         arquivo_jogadores.close();
 
-        sort(nomes.begin(), nomes.end());
+        sort(jogadores.begin(), jogadores.end());
 
         cout << "Lista de Jogadores:\n";
-        for (int i = 0; i < nomes.size(); ++i)
+        for (int i = 0; i < jogadores.size(); ++i)
         {
-            cout << i + 1 << ". " << nomes[i] << "\n";
+            cout << i + 1 << ". " << jogadores[i].first << "\n";
         }
 
         vector<string> coresDisponiveis = {
@@ -334,12 +357,26 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
             cout << "\nDigite o nome do jogador " << i + 1 << ": ";
             cin >> nomePesquisado;
 
-            auto it = find(nomes.begin(), nomes.end(), nomePesquisado);
-            if (it != nomes.end())
+            auto it = find_if(jogadores.begin(), jogadores.end(), [&nomePesquisado](const pair<string, string> &jogador)
+                              { return jogador.first == nomePesquisado; });
+
+            if (it != jogadores.end())
             {
-                cout << "Jogador " << *it << " encontrado.\n";
-                jogadoresSelecionados.push_back(*it);
-                nomes.erase(it);
+                string senha;
+                cout << "Digite a senha do jogador " << nomePesquisado << ": ";
+                cin >> senha;
+
+                if (senha == it->second)
+                {
+                    cout << "Jogador " << it->first << " autenticado.\n";
+                    jogadoresSelecionados.push_back(it->first);
+                    jogadores.erase(it);
+                }
+                else
+                {
+                    cout << "Senha incorreta.\n";
+                    --i; // Repetir a iteração para permitir que o usuário insira o nome e a senha novamente
+                }
             }
             else
             {
@@ -352,7 +389,7 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
         for (int i = 0; i < jogadoresSelecionados.size(); ++i)
         {
 
-            system("cls");
+            limparTela();
 
             cout << "Escolha a cor para o jogador " << jogadoresSelecionados[i] << ":\n";
 
@@ -372,8 +409,7 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
                 // Verificar se a cor escolhida está dentro do intervalo válido
                 if (corEscolhida < 1 || corEscolhida > coresDisponiveis.size())
                 {
-                    ::cout << "Opção invalida. Por favor, escolha uma cor valida.\n";
-                    --i;
+                    cout << "Opção invalida. Por favor, escolha uma cor valida.\n";
                 }
             } while (corEscolhida < 1 || corEscolhida > coresDisponiveis.size());
 
@@ -662,6 +698,7 @@ void tela_Jogar(const std::vector<std::string> &nomesJogadores, const std::vecto
 
     } while (partidaFinalizada != 3);
 }
+
 
 void tela_Ranking()
 {
