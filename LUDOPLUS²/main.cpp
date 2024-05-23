@@ -16,13 +16,19 @@ time_t tempoInicial;
 
 void salvarJogador_txt(string nome, string senha);
 void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<string, string>> jogadoresCores, vector<pair<string, pair<string, int>>> ranking);
+void solicitarDadosJogador(string &nome, string &senha, string &perguntaSeguranca, string &respostaPergunta);
 void salvarEditarPerfil(string nomeAtual, string senhaAtual);
 void fecharJogo();
+void validarLogin(string nome, string senha);
 bool verificarNomeExistente(const string &nome);
+bool verificarTamanhoSenha(const string &senha);
+bool verificarSenhasIguais(const string &senha, const string &confirmarSenha);
+bool verificarRespostasIguais(const string &resposta, const string &confirmarResposta);
+void excluirPerfil(const string &nome, const string &senha, const string &respostaPergunta);
 int selecionarQuantidadeJogParaPartida();
 void selecionarJogadoresECoresParaPartida(int num_jogadores);
-void validarLogin(string nome, string senha);
-void selecionarJogadoresECoresParaPartida();
+void limparTela();
+string trim(const string &str);
 int rolarDado();
 void moverPeca(int &posicaoAtual, int numRolado);
 
@@ -38,34 +44,33 @@ void tela_HistoricoPartidas();
 void tela_EditarPerfil();
 void tela_RecuperarSenha();
 void tela_Regras();
+void tela_ExcluirPerfil();
 
 int main()
 {
     tela_Login();
     return 0;
 }
-
-void salvarJogador_txt(string nome, string senha, string perguntaSeguranca, string respostaPergunta)
+        
+void salvarJogador_txt(const string &nome, const string &senha, const string &perguntaSeguranca, const string &respostaPergunta)
 {
-
-    ofstream arquivo("jogadores.txt", ios::app);
-
-    if (arquivo.is_open())
+    ofstream arquivo_jogadores("jogadores.txt", ios::app);
+    if (arquivo_jogadores.is_open())
     {
-        arquivo << "Nome: " << nome << endl;
-        arquivo << "Senha: " << senha << endl;
-        arquivo << "pergunta segurança: " << perguntaSeguranca << endl;
-        arquivo << "resposta pergunta: " << respostaPergunta << endl;
-        arquivo.close();
+        arquivo_jogadores << "Nome: " << nome << endl;
+        arquivo_jogadores << "Senha: " << senha << endl;
+        arquivo_jogadores << "Pergunta: " << perguntaSeguranca << endl;
+        arquivo_jogadores << "Resposta: " << respostaPergunta << endl;
+        arquivo_jogadores.close();
         system("cls");
-        cout << "Dados salvos com sucesso." << endl;
+        cout << "Jogador cadastrado com sucesso!" << endl;
         system("pause");
         tela_Login();
     }
     else
     {
         system("cls");
-        cout << "Erro ao abrir o arquivo para salvar os dados." << endl;
+        cout << "Erro ao abrir o arquivo de jogadores." << endl;
         system("pause");
         tela_Login();
     }
@@ -102,8 +107,61 @@ void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<stri
     }
 }
 
+void solicitarDadosJogador(string &nome, string &senha, string &perguntaSeguranca, string &respostaPergunta)
+{
+    cout << "\033[1;32mInforme um nome:\033[0m" << endl;
+    cin >> nome;
+
+    while (verificarNomeExistente(nome))
+    {
+        cout << "\033[1;32mInforme outro nome:\033[0m" << endl;
+        cin >> nome;
+    }
+
+    string confirmarSenha;
+    do
+    {
+        cout << "\033[1;32mInforme a sua senha (mínimo de 6 caracteres):\033[0m " << endl;
+        cin >> senha;
+        if (!verificarTamanhoSenha(senha))
+        {
+            cout << "\033[1;31mA senha deve ter no mínimo 6 caracteres.\033[0m" << endl;
+        }
+        else
+        {
+            cout << "\033[1;32mConfirme sua senha:\033[0m " << endl;
+            cin >> confirmarSenha;
+            if (!verificarSenhasIguais(senha, confirmarSenha))
+            {
+                cout << "\033[1;31mAs senhas não coincidem.\033[0m" << endl;
+            }
+        }
+    } while (!verificarTamanhoSenha(senha) || !verificarSenhasIguais(senha, confirmarSenha));
+
+    cout << "\033[1;32mDigite uma pergunta que apenas você saiba responder:\033[0m" << endl;
+    cin.ignore(); // Ignora o restante da linha anterior
+    getline(cin, perguntaSeguranca); // Permite espaços na pergunta
+    cout << "\033[1;32mInforme a resposta da pergunta:\033[0m" << endl;
+    getline(cin, respostaPergunta); // Permite espaços na resposta
+
+    string confirmarRespostaSenha;
+    cout << "\033[1;32mConfirme a resposta da pergunta:\033[0m" << endl;
+    getline(cin, confirmarRespostaSenha); // Permite espaços na confirmação
+
+    while (!verificarRespostasIguais(respostaPergunta, confirmarRespostaSenha))
+    {
+        cout << "\033[1;31mAs respostas da pergunta de segurança não coincidem.\033[0m" << endl;
+        cout << "\033[1;32mInforme a resposta da pergunta:\033[0m" << endl;
+        getline(cin, respostaPergunta); // Permite espaços na resposta
+        cout << "\033[1;32mConfirme a resposta da pergunta:\033[0m" << endl;
+        getline(cin, confirmarRespostaSenha); // Permite espaços na confirmação
+    }
+}
+
 void salvarEditarPerfil(string nomeAtual, string senhaAtual)
 {
+    system("cls");
+
     ifstream arquivo_jogadores("jogadores.txt");
     ofstream arquivo_temporario("temporario_jogadores.txt");
 
@@ -114,7 +172,7 @@ void salvarEditarPerfil(string nomeAtual, string senhaAtual)
 
         while (getline(arquivo_jogadores, linha))
         {
-            if (linha.find("Nome: ") != string::npos && linha.find(nomeAtual) != string::npos)
+            if (linha.find("Nome: " + nomeAtual) != string::npos)
             {
                 string senhaSalva = ""; // Variável para armazenar a senha salva do usuário
                 string perguntaSalva = "";
@@ -140,14 +198,7 @@ void salvarEditarPerfil(string nomeAtual, string senhaAtual)
                 { // Verificar se a senha atual coincide
                     // Se coincide, solicitar as novas informações e editar o perfil
                     string novoNome, novaSenha, NovaPerguntaSeguranca, novaRespostaPergunta;
-                    cout << "Digite seu novo nome ou o mesmo nome: ";
-                    cin >> novoNome;
-                    cout << "Digite sua nova senha ou a mesma senha: ";
-                    cin >> novaSenha;
-                    cout << "Digite sua nova pergunta de seguranca ou a mesma nova pergunta de seguranca: ";
-                    cin >> NovaPerguntaSeguranca;
-                    cout << "Digite sua nova nova resposta de seguranca ou a mesma resposta de seguranca: ";
-                    cin >> novaRespostaPergunta;
+                    solicitarDadosJogador(novoNome, novaSenha, NovaPerguntaSeguranca, novaRespostaPergunta);
 
                     arquivo_temporario << "Nome: " << novoNome << endl;
                     arquivo_temporario << "Senha: " << novaSenha << endl;
@@ -179,6 +230,7 @@ void salvarEditarPerfil(string nomeAtual, string senhaAtual)
         {
             remove("jogadores.txt");
             rename("temporario_jogadores.txt", "jogadores.txt");
+            system("cls");
             cout << "Perfil editado com sucesso!" << endl;
             system("pause");
             tela_Menu();
@@ -258,18 +310,114 @@ bool verificarNomeExistente(const string &nome)
     string linha;
     while (getline(arquivo, linha))
     {
-        size_t pos = linha.find(':');
-        if (pos != string::npos)
+        if (linha.find("Nome: " + nome) != string::npos)
         {
-            string nomeExistente = linha.substr(0, pos);
-            if (nomeExistente == nome)
-            {
-                cout << "Este nome já existe. Por favor, escolha outro nome." << endl;
-                return true;
-            }
+            cout << "Este nome já existe. Por favor, escolha outro nome." << endl;
+            return true;
         }
     }
     return false;
+}
+
+bool verificarTamanhoSenha(const string &senha)
+{
+    return senha.length() >= 6;
+}
+
+bool verificarSenhasIguais(const string &senha, const string &confirmarSenha)
+{
+    return senha == confirmarSenha;
+}
+
+bool verificarRespostasIguais(const string &resposta, const string &confirmarResposta)
+{
+    return resposta == confirmarResposta;
+}
+
+void excluirPerfil(const string &nome, const string &senha, const string &respostaPergunta)
+{
+    ifstream arquivo_jogadores("jogadores.txt");
+    ofstream arquivo_temporario("temporario_jogadores.txt");
+
+    if (arquivo_jogadores.is_open() && arquivo_temporario.is_open())
+    {
+        string linha;
+        bool jogadorEncontrado = false;
+
+        while (getline(arquivo_jogadores, linha))
+        {
+            if (linha.find("Nome: " + nome) != string::npos)
+            {
+                string senhaSalva = "";
+                string perguntaSalva = "";
+                string respostaSalva = "";
+                // Encontrou o jogador a ser excluído, verificar a senha e a resposta da pergunta
+                while (getline(arquivo_jogadores, linha))
+                {
+                    if (linha.find("Senha: ") != string::npos)
+                    {
+                        senhaSalva = linha.substr(7); // Obter a senha salva do arquivo
+                    }
+                    else if (linha.find("Pergunta: ") != string::npos)
+                    {
+                        perguntaSalva = linha.substr(10); // Obter a pergunta salva do arquivo
+                    }
+                    else if (linha.find("Resposta: ") != string::npos)
+                    {
+                        respostaSalva = linha.substr(10); // Obter a resposta salva do arquivo
+                        break;                            // Parar ao encontrar a resposta da pergunta
+                    }
+                }
+                if (senha == senhaSalva && respostaPergunta == respostaSalva)
+                { // Verificar se a senha e a resposta coincidem
+                    jogadorEncontrado = true;
+                    // Não copiar o perfil para o arquivo temporário, efetivamente excluindo-o
+                }
+                else
+                {
+                    // Dados incorretos, manter os dados originais
+                    cout << "Senha ou resposta da pergunta de segurança incorretas, por favor tente novamente." << endl;
+                    arquivo_temporario << "Nome: " << nome << endl;
+                    arquivo_temporario << "Senha: " << senhaSalva << endl;
+                    arquivo_temporario << "Pergunta: " << perguntaSalva << endl;
+                    arquivo_temporario << "Resposta: " << respostaSalva << endl;
+                }
+            }
+            else
+            {
+                // Copiar outras linhas do arquivo original para o arquivo temporário
+                arquivo_temporario << linha << endl;
+            }
+        }
+
+        arquivo_jogadores.close();
+        arquivo_temporario.close();
+
+        if (jogadorEncontrado)
+        {
+            remove("jogadores.txt");
+            rename("temporario_jogadores.txt", "jogadores.txt");
+            system("cls");
+            cout << "Perfil excluído com sucesso!" << endl;
+            system("pause");
+            tela_Login();
+        }
+        else
+        {
+            remove("temporario_jogadores.txt"); // Remover o arquivo temporário se o jogador não foi encontrado
+            system("cls");
+            cout << "Perfil não encontrado ou dados incorretos." << endl;
+            system("pause");
+            tela_ExcluirPerfil();
+        }
+    }
+    else
+    {
+        system("cls");
+        cout << "Erro ao abrir os arquivos." << endl;
+        system("pause");
+        tela_Menu();
+    }
 }
 
 int selecionarQuantidadeJogParaPartida()
@@ -286,22 +434,6 @@ int selecionarQuantidadeJogParaPartida()
     } while (num_jogadores < 2 || num_jogadores > 4);
     // Chamando o método selecionarJogadoresECoresParaPartida() com o número de jogadores selecionado
     selecionarJogadoresECoresParaPartida(num_jogadores);
-}
-
-void limparTela()
-{
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
-}
-
-string trim(const string &str)
-{
-    size_t first = str.find_first_not_of(' ');
-    size_t last = str.find_last_not_of(' ');
-    return str.substr(first, (last - first + 1));
 }
 
 void selecionarJogadoresECoresParaPartida(int num_jogadores)
@@ -430,15 +562,29 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
     }
 }
 
-// Função para rolar o dado
-int rolarDado()
+void limparTela()
 {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
+string trim(const string &str)
+{
+    size_t first = str.find_first_not_of(' ');
+    size_t last = str.find_last_not_of(' ');
+    return str.substr(first, (last - first + 1));
+}
+
+int rolarDado()
+{   // Função para rolar o dado
     return rand() % 6 + 1; // Gera um número aleatório de 1 a 6
 }
 
-// Função para mover a peça do jogador
 void moverPeca(int &posicaoAtual, int numRolado)
-{
+{   // Função para mover a peça do jogador
     posicaoAtual += numRolado; // Move a peça para frente
 }
 
@@ -507,6 +653,7 @@ void tela_Menu()
     cout << "             [4] - Editar/excluir perfil   " << endl;
     cout << "             [5] - Regras do Jogo   " << endl;
     cout << "             [6] - voltar ao login             " << endl;
+    cout << "             [7] - Excluir Perfil             " << endl;
     cout << "                                                 " << endl;
     cout << "\033[1;31m==============================================\033[0m" << endl;
 
@@ -540,9 +687,15 @@ void tela_Menu()
     {
         tela_Login();
     }
+    else if (opcao_Menu == 7)
+    {
+        tela_ExcluirPerfil();
+    }
     else
     {
-        cout << "opção invalida, digite novamente";
+        system("cls");
+        cout << "opção invalida, tente novamente";
+        system("pause");
         tela_Menu();
     }
 }
@@ -551,39 +704,10 @@ void tela_Cadastrar()
 {
     system("cls"); // Limpa o console antes de exibir a tela de cadastro
 
-    string nome, senha;
-    string perguntaSeguranca, respostaPergunta;
+    string nome, senha, perguntaSeguranca, respostaPergunta;
+    solicitarDadosJogador(nome, senha, perguntaSeguranca, respostaPergunta);
 
-    cout << "\033[1;31m===========================\033[0m" << endl;
-    cout << "      CADASTRAR JOGADOR     " << endl;
-    cout << "\033[1;31m===========================\033[0m" << endl
-         << endl;
-
-    cout << "\033[1;32mInforme um nome:\033[0m" << endl;
-    cin >> nome;
-
-    while (verificarNomeExistente(nome))
-    {
-        cout << "\033[1;32mInforme outro nome:\033[0m" << endl;
-        cin >> nome;
-    }
-
-    do
-    {
-        cout << "\033[1;32mInforme a sua senha (minimo de 6 caracteres):\033[0m " << endl;
-        cin >> senha;
-        if (senha.length() <= 5)
-        {
-            cout << "\033[1;31mA senha deve ter no minimo 6 caracteres.\033[0m" << endl;
-        }
-    } while (senha.length() <= 5);
-
-    cout << "\033[1;32mDigite uma pergunta que apenas voce saiba responder:\033[0m" << endl;
-    cin >> perguntaSeguranca;
-    cout << "\033[1;32mInforme a resposta da pergunta:\033[0m" << endl;
-    cin >> respostaPergunta;
-
-    // Salvar o jogador apenas se o nome for único e a senha atender aos requisitos
+    // Salvar o jogador
     salvarJogador_txt(nome, senha, perguntaSeguranca, respostaPergunta);
 }
 
@@ -699,7 +823,6 @@ void tela_Jogar(const std::vector<std::string> &nomesJogadores, const std::vecto
     } while (partidaFinalizada != 3);
 }
 
-
 void tela_Ranking()
 {
     system("cls"); // Limpa o console antes de exibir a tela de ranking
@@ -718,18 +841,18 @@ void tela_Ranking()
     //       cout << "Erro ao abrir o arquivo de ranking." << endl;
     //  }
 
-    int voltar;
-    cout << "\033[1;31m[1] - Digite 1 para Voltar\nOpcao: \033[0m" << endl;
-    cin >> voltar;
+    int opcao;
+    cout << "\033[1;31m[1] - Digite 1 para Voltar\nOpcao: \033[0m";
+    cin >> opcao;
 
-    if (voltar == 1)
+    if (opcao == 1)
     {
         tela_Menu();
     }
     else
     {
         system("cls");
-        cout << "opcao invalida" << endl;
+        cout << "opcao invalida";
         system("pause");
         tela_Ranking();
     }
@@ -777,16 +900,16 @@ void tela_HistoricoPartidas()
     else
     {
         system("cls");
-        cout << "Erro ao abrir o arquivo de histórico de partidas." << endl;
+        cout << "Erro ao abrir o arquivo de histórico de partidas.";
         system("pause");
         tela_Menu();
     }
 
-    int voltar;
-    cout << "\033[1;31m[1] - Digite 1 para Voltar\nOpcao: \033[0m" << endl;
-    cin >> voltar;
+    int opcao;
+    cout << "\033[1;31m[1] - Digite 1 para Voltar\nOpcao: \033[0m";
+    cin >> opcao;
 
-    if (voltar == 1)
+    if (opcao == 1)
     {
         tela_Menu();
     }
@@ -801,6 +924,7 @@ void tela_HistoricoPartidas()
 
 void tela_EditarPerfil()
 {
+    system("cls");
 
     int opcao;
     cout << "\033Digite 1 para editar o perfil\nDigite 2 para voltar ao menu\nOpcao: \033";
@@ -824,8 +948,9 @@ void tela_EditarPerfil()
     }
     else
     {
-
-        cout << "Opcao invalida. Tente novamente." << endl;
+        system("cls");
+        cout << "Opcao invalida. Tente novamente.";
+        system("pause");
         tela_EditarPerfil();
     }
 }
@@ -835,14 +960,14 @@ void tela_RecuperarSenha()
     system("cls");
     int opcao;
 
-    cout << "\033Digite 1 para recuperar sua senha\nDigite 2 para voltar a tela de login\nOpcao: \033";
+    cout << "Digite 1 para recuperar sua senha\nDigite 2 para voltar a tela de login\nOpcao: ";
     cin >> opcao;
 
     if (opcao == 1)
     {
         string nome;
 
-        cout << "Digite seu nome de usuario para recuperar a senha: ";
+        cout << "Digite seu nome de usuario para recuperar a senha: " << endl;
         cin >> nome;
 
         ifstream arquivo_jogadores("jogadores.txt", ios::in);
@@ -879,7 +1004,10 @@ void tela_RecuperarSenha()
                     }
                     else
                     {
-                        cout << "Resposta incorreta." << endl;
+                        system("cls");
+                        cout << "Resposta incorreta.";
+                        system("pause");
+                        tela_RecuperarSenha();
                     }
                     break; // Sai do loop ao encontrar o nome de usuário
                 }
@@ -887,7 +1015,10 @@ void tela_RecuperarSenha()
 
             if (!nomeEncontrado)
             {
-                cout << "Nome de usuario nao encontrado." << endl;
+                system("cls");
+                cout << "Nome de usuario nao encontrado.";
+                system("pause");
+                tela_RecuperarSenha();
             }
 
             arquivo_jogadores.close();
@@ -904,7 +1035,7 @@ void tela_RecuperarSenha()
     else
     {
         system("cls");
-        cout << "Opcao invalida. Tente novamente." << endl;
+        cout << "Opcao invalida. Tente novamente.";
         system("pause");
         tela_RecuperarSenha();
     }
@@ -922,11 +1053,11 @@ void tela_Regras()
     cout << "\033[34m 4. Se durante a partida o jogador tirar o numero 6 ao rodar o dado ele podera rodar novamente o dado limitado a 3 lances seguidos fora lance o original.\033[0m" << endl;
     cout << "\033[34m 5. Se o jogador cair em uma casinha que possua o simbolo:# ele podera avançar 6 casinhas para frente ou esolher reitar mais umas peça da sua toca.\033[0m" << endl;
 
-    int voltar;
-    cout << "\033[1;31m[1] - Digite 1 para Voltar\nOpcao: \033[0m" << endl;
-    cin >> voltar;
+    int opcao;
+    cout << "\033[1;31m[1] - Digite 1 para Voltar\nOpcao: \033[0m";
+    cin >> opcao;
 
-    if (voltar == 1)
+    if (opcao == 1)
     {
         tela_Menu();
     }
@@ -938,3 +1069,40 @@ void tela_Regras()
         tela_Regras();
     }
 }
+
+void tela_ExcluirPerfil()
+{
+    system("cls");
+
+    int opcao;
+    cout << "\033[1;31m==============\033[0m EXCLUIR PERFIL \033[1;31m==============\033[0m" << endl;
+    cout << "Digite 1 para excluir o perfil\nDigite 2 para voltar ao menu\nOpcao: ";
+    cin >> opcao;
+
+    if (opcao == 1)
+    {
+        string nome, senha, respostaPergunta;
+
+        cout << "Digite seu nome de usuario: ";
+        cin >> nome;
+        cout << "Digite sua senha: ";
+        cin >> senha;
+        cout << "Digite a resposta da sua pergunta de seguranca: ";
+        cin.ignore(); // Ignora o newline da entrada anterior
+        getline(cin, respostaPergunta);
+
+        excluirPerfil(nome, senha, respostaPergunta);
+    }
+    else if (opcao == 2)
+    {
+        tela_Menu();
+    }
+    else
+    {
+        system("cls");
+        cout << "Opcao invalida. Tente novamente.";
+        system("pause");
+        tela_ExcluirPerfil();
+    }
+}
+
