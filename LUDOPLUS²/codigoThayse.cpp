@@ -101,15 +101,9 @@ void exibirJogadorAtual(int jogadorAtual) {
 }
 
 // Funcao para mover uma peca da base para o tabuleiro
-void moverPecaDaBase(int jogadorAtual, std::vector<std::vector<char>>& tabuleiro, int resultadoDado) {
+bool moverPecaDaBase(int jogadorAtual, std::vector<std::vector<char>>& tabuleiro, int resultadoDado) {
     int linhaAlvo, colunaAlvo;
     bool pecaMovida = false;
-
-    // Verificar se o resultado do dado e igual a 6
-    if (resultadoDado != 6) {
-        std::cerr << "Erro: Voce precisa tirar 6 para mover uma peca da base para o tabuleiro." << std::endl;
-        return;
-    }
 
     // Determinar as posicoes alvo com base no jogador atual
     switch (jogadorAtual) {
@@ -131,7 +125,13 @@ void moverPecaDaBase(int jogadorAtual, std::vector<std::vector<char>>& tabuleiro
         break;
     default:
         std::cerr << "Erro: Jogador invalido!" << std::endl;
-        return;
+        return false;
+    }
+
+    // Verificar se o resultado do dado e igual a 6
+    if (resultadoDado != 6) {
+        std::cerr << "Voce precisa tirar 6 para mover uma peca da base para o tabuleiro." << std::endl;
+        return false;
     }
 
     // Verificar a posicao da peca na base e mover uma peca
@@ -154,8 +154,55 @@ void moverPecaDaBase(int jogadorAtual, std::vector<std::vector<char>>& tabuleiro
     }
 
     if (!pecaMovida) {
-        std::cerr << "Erro: Nao ha pecas na base para mover." << std::endl;
+        std::cerr << "Nao ha pecas na base para mover." << std::endl;
     }
+
+    return pecaMovida;
+}
+
+void moverPecaNoTabuleiro(int jogadorAtual, std::vector<std::vector<char>>& tabuleiro, int resultadoDado) {
+    std::vector<std::pair<int, int>> posicoesValidas;
+
+    // Percorre o tabuleiro e encontra todas as posições válidas para mover uma peça
+    for (int i = 0; i < TAMANHO_TABULEIRO; ++i) {
+        for (int j = 0; j < TAMANHO_TABULEIRO; ++j) {
+            if (tabuleiro[i][j] == '0' + jogadorAtual) {
+                posicoesValidas.push_back(std::make_pair(i, j));
+            }
+        }
+    }
+
+    // Verifica se há pelo menos uma peça para mover
+    if (posicoesValidas.empty()) {
+        std::cerr << "Erro: O jogador " << jogadorAtual << " nao tem pecas no tabuleiro para mover." << std::endl;
+        return;
+    }
+
+    // Escolhe aleatoriamente uma das posições válidas
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, posicoesValidas.size() - 1);
+    int indice = dis(gen);
+    int linha = posicoesValidas[indice].first;
+    int coluna = posicoesValidas[indice].second;
+
+    // Move a peça para frente de acordo com o valor do dado
+    for (int i = 0; i < resultadoDado; ++i) {
+        // Lógica para mover a peça dependendo do caminho do tabuleiro
+        // (neste exemplo, está apenas movendo a peça para a direita)
+        if (coluna + 1 < TAMANHO_TABULEIRO) {
+            tabuleiro[linha][coluna + 1] = tabuleiro[linha][coluna];
+            tabuleiro[linha][coluna] = ' ';
+            coluna++;
+        } else {
+            // Se a peça chegou ao final do tabuleiro, retorna à área inicial
+            tabuleiro[linha][coluna] = '0' + jogadorAtual;
+            break;
+        }
+    }
+
+    // Atualiza o tabuleiro após mover a peça
+    imprimirTabuleiro(tabuleiro);
 }
 
 int main() {
@@ -172,18 +219,28 @@ int main() {
         int resultadoDado = rolarDado();
         std::cout << "O dado rolou: " << resultadoDado << std::endl;
 
+        bool jogarNovamente = false;
+
         if (resultadoDado == 6) {
-            moverPecaDaBase(jogadorAtual, tabuleiroLudo, resultadoDado); // Mover peca da base para a posicao alvo
+            jogarNovamente = moverPecaDaBase(jogadorAtual, tabuleiroLudo, resultadoDado);
         }
         else {
-            std::cout << "Voce nao tirou 6, nao pode mover uma peca da base." << std::endl;
+            std::cout << "Voce nao tirou 6, movendo uma peca no tabuleiro..." << std::endl;
+            moverPecaNoTabuleiro(jogadorAtual, tabuleiroLudo, resultadoDado);
         }
 
-        // Atualizar o tabuleiro apos mover a peca
-        // Não imprimir tabuleiro aqui
+        // Se o jogador tirou um 6 e moveu uma peça da base para o tabuleiro, ele joga novamente
+        if (resultadoDado == 6 && jogarNovamente) {
+            imprimirTabuleiro(tabuleiroLudo);
+            std::cout << "Pressione Enter para rolar o dado novamente..." << std::endl;
+            std::cin.get();
+            resultadoDado = rolarDado();
+            std::cout << "O dado rolou: " << resultadoDado << std::endl;
+        }
 
         // Mudar para o proximo jogador
         mudarVez(jogadorAtual);
     }
-return 0;
+
+    return 0;
 }

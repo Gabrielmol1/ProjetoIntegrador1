@@ -27,6 +27,8 @@ bool verificarRespostasIguais(const string &resposta, const string &confirmarRes
 void excluirPerfil(const string &nome, const string &senha, const string &respostaPergunta);
 int selecionarQuantidadeJogParaPartida();
 void selecionarJogadoresECoresParaPartida(int num_jogadores);
+void imprimirTabuleiro(const vector<vector<string>>& tabuleiro);
+
 void limparTela();
 string trim(const string &str);
 int rolarDado();
@@ -438,7 +440,6 @@ int selecionarQuantidadeJogParaPartida()
 
 void selecionarJogadoresECoresParaPartida(int num_jogadores)
 {
-
     limparTela();
 
     if (num_jogadores < 2 || num_jogadores > 4)
@@ -453,17 +454,21 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
     if (arquivo_jogadores.is_open())
     {
         string linha;
+        string nome, senha;
+
         while (getline(arquivo_jogadores, linha))
         {
             if (linha.find("Nome: ") != string::npos)
             {
-                size_t posNome = linha.find("Nome: ") + 6;
-                size_t posSenha = linha.find(", Senha: ");
-                string nome = trim(linha.substr(posNome, posSenha - posNome));
-                string senha = trim(linha.substr(posSenha + 9));
-                jogadores.push_back(make_pair(nome, senha));
+                nome = trim(linha.substr(6));
+                if (getline(arquivo_jogadores, linha) && linha.find("Senha: ") != string::npos)
+                {
+                    senha = trim(linha.substr(7));
+                    jogadores.push_back(make_pair(nome, senha));
+                }
             }
         }
+
         arquivo_jogadores.close();
 
         sort(jogadores.begin(), jogadores.end());
@@ -520,7 +525,6 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
         cout << "\nAssocie as cores aos jogadores:\n";
         for (int i = 0; i < jogadoresSelecionados.size(); ++i)
         {
-
             limparTela();
 
             cout << "Escolha a cor para o jogador " << jogadoresSelecionados[i] << ":\n";
@@ -559,6 +563,15 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
     {
         cout << "Erro ao abrir o arquivo de jogadores.\n";
         return;
+    }
+}
+
+void imprimirTabuleiro(const vector<vector<string>>& tabuleiro) {
+    for (const auto& linha : tabuleiro) {
+        for (const auto& celula : linha) {
+            std::cout << celula << " ";
+        }
+        std::cout << "\n";
     }
 }
 
@@ -722,7 +735,7 @@ void Tela_Jogar_MostrarTempoNaTela()
          << "TIMER DO JOGO: " << segundosDecorridos << endl;
 }
 
-void tela_Jogar(const std::vector<std::string> &nomesJogadores, const std::vector<std::string> &coresJogadores)
+void tela_Jogar(const vector<string> &nomesJogadores, const vector<string> &coresJogadores)
 {
     system("cls"); // Limpa o console antes de exibir a tela de cadastro
 
