@@ -27,7 +27,7 @@ bool verificarRespostasIguais(const string &resposta, const string &confirmarRes
 void excluirPerfil(const string &nome, const string &senha, const string &respostaPergunta);
 int selecionarQuantidadeJogParaPartida();
 void selecionarJogadoresECoresParaPartida(int num_jogadores);
-void imprimirTabuleiro(const vector<vector<string>>& tabuleiro);
+void imprimirTabuleiro(const vector<vector<string>> &tabuleiro);
 
 void limparTela();
 string trim(const string &str);
@@ -53,7 +53,7 @@ int main()
     tela_Login();
     return 0;
 }
-        
+
 void salvarJogador_txt(const string &nome, const string &senha, const string &perguntaSeguranca, const string &respostaPergunta)
 {
     ofstream arquivo_jogadores("jogadores.txt", ios::app);
@@ -141,7 +141,7 @@ void solicitarDadosJogador(string &nome, string &senha, string &perguntaSeguranc
     } while (!verificarTamanhoSenha(senha) || !verificarSenhasIguais(senha, confirmarSenha));
 
     cout << "\033[1;32mDigite uma pergunta que apenas você saiba responder:\033[0m" << endl;
-    cin.ignore(); // Ignora o restante da linha anterior
+    cin.ignore();                    // Ignora o restante da linha anterior
     getline(cin, perguntaSeguranca); // Permite espaços na pergunta
     cout << "\033[1;32mInforme a resposta da pergunta:\033[0m" << endl;
     getline(cin, respostaPergunta); // Permite espaços na resposta
@@ -505,7 +505,7 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
 
                 if (senha == it->second)
                 {
-                    cout << "Jogador " << it->first << " autenticado.\n";
+                    cout << "Jogador " << it->first << " adicionado." << endl;
                     jogadoresSelecionados.push_back(it->first);
                     jogadores.erase(it);
                 }
@@ -566,9 +566,12 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
     }
 }
 
-void imprimirTabuleiro(const vector<vector<string>>& tabuleiro) {
-    for (const auto& linha : tabuleiro) {
-        for (const auto& celula : linha) {
+void imprimirTabuleiro(const vector<vector<string>> &tabuleiro)
+{
+    for (const auto &linha : tabuleiro)
+    {
+        for (const auto &celula : linha)
+        {
             std::cout << celula << " ";
         }
         std::cout << "\n";
@@ -592,12 +595,12 @@ string trim(const string &str)
 }
 
 int rolarDado()
-{   // Função para rolar o dado
+{                          // Função para rolar o dado
     return rand() % 6 + 1; // Gera um número aleatório de 1 a 6
 }
 
 void moverPeca(int &posicaoAtual, int numRolado)
-{   // Função para mover a peça do jogador
+{                              // Função para mover a peça do jogador
     posicaoAtual += numRolado; // Move a peça para frente
 }
 
@@ -666,7 +669,6 @@ void tela_Menu()
     cout << "             [4] - Editar/excluir perfil   " << endl;
     cout << "             [5] - Regras do Jogo   " << endl;
     cout << "             [6] - voltar ao login             " << endl;
-    cout << "             [7] - Excluir Perfil             " << endl;
     cout << "                                                 " << endl;
     cout << "\033[1;31m==============================================\033[0m" << endl;
 
@@ -699,10 +701,6 @@ void tela_Menu()
     else if (opcao_Menu == 6)
     {
         tela_Login();
-    }
-    else if (opcao_Menu == 7)
-    {
-        tela_ExcluirPerfil();
     }
     else
     {
@@ -940,7 +938,8 @@ void tela_EditarPerfil()
     system("cls");
 
     int opcao;
-    cout << "\033Digite 1 para editar o perfil\nDigite 2 para voltar ao menu\nOpcao: \033";
+    cout << "1 - Editar o perfil" << endl;
+    cout << "2 - Excluir Perfil" << endl;
     cin >> opcao;
 
     if (opcao == 1)
@@ -948,16 +947,16 @@ void tela_EditarPerfil()
         string nomeAtual, senhaAtual;
 
         cout << "\033[1;31m==============\033[0m EDITAR PERFIL \033[1;31m==============\033[0m" << endl;
-        cout << "Digite seu nome de usuario atual: ";
+        cout << "Usuario: ";
         cin >> nomeAtual;
-        cout << "Digite sua senha de usuario atual: ";
+        cout << "Senha: ";
         cin >> senhaAtual;
 
         salvarEditarPerfil(nomeAtual, senhaAtual);
     }
     else if (opcao == 2)
     {
-        tela_Menu();
+        tela_ExcluirPerfil();
     }
     else
     {
@@ -973,14 +972,15 @@ void tela_RecuperarSenha()
     system("cls");
     int opcao;
 
-    cout << "Digite 1 para recuperar sua senha\nDigite 2 para voltar a tela de login\nOpcao: ";
+    cout << "1 - Recuperar senha" << endl;
+    cout << "2 - Login" << endl;
     cin >> opcao;
 
     if (opcao == 1)
     {
         string nome;
 
-        cout << "Digite seu nome de usuario para recuperar a senha: " << endl;
+        cout << "Usuario: " << endl;
         cin >> nome;
 
         ifstream arquivo_jogadores("jogadores.txt", ios::in);
@@ -1006,7 +1006,7 @@ void tela_RecuperarSenha()
 
                     // Lê a resposta do usuário para a pergunta de segurança
                     string resposta;
-                    cout << "Digite a resposta da pergunta de seguranca: ";
+                    cout << "Resposta pergunta de seguranca: ";
                     cin >> resposta;
 
                     // Verifica se a resposta está correta
@@ -1087,35 +1087,27 @@ void tela_ExcluirPerfil()
 {
     system("cls");
 
-    int opcao;
-    cout << "\033[1;31m==============\033[0m EXCLUIR PERFIL \033[1;31m==============\033[0m" << endl;
-    cout << "Digite 1 para excluir o perfil\nDigite 2 para voltar ao menu\nOpcao: ";
-    cin >> opcao;
+    string nome, senha, respostaPergunta;
 
-    if (opcao == 1)
-    {
-        string nome, senha, respostaPergunta;
+    cout << "Digite seu nome de usuario: ";
+    cin >> nome;
+    cout << "Digite sua senha: ";
+    cin >> senha;
+    cout << "Digite a resposta da sua pergunta de seguranca: ";
+    cin.ignore(); // Ignora o newline da entrada anterior
+    getline(cin, respostaPergunta);
 
-        cout << "Digite seu nome de usuario: ";
-        cin >> nome;
-        cout << "Digite sua senha: ";
-        cin >> senha;
-        cout << "Digite a resposta da sua pergunta de seguranca: ";
-        cin.ignore(); // Ignora o newline da entrada anterior
-        getline(cin, respostaPergunta);
-
-        excluirPerfil(nome, senha, respostaPergunta);
-    }
-    else if (opcao == 2)
-    {
-        tela_Menu();
-    }
-    else
-    {
-        system("cls");
-        cout << "Opcao invalida. Tente novamente.";
-        system("pause");
-        tela_ExcluirPerfil();
-    }
+    excluirPerfil(nome, senha, respostaPergunta);
+    // }
+    // else if (opcao == 2)
+    // {
+    //     tela_Menu();
+    // }
+    // else
+    // {
+    //     system("cls");
+    //     cout << "Opcao invalida. Tente novamente.";
+    //     system("pause");
+    //     tela_ExcluirPerfil();
+    // }
 }
-
