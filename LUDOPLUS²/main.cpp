@@ -735,106 +735,106 @@ void Tela_Jogar_MostrarTempoNaTela()
          << "TIMER DO JOGO: " << segundosDecorridos << endl;
 }
 
-// void tela_Jogar(const vector<string> &nomesJogadores, const vector<string> &coresJogadores)
-// {
-//     system("cls"); // Limpa o console antes de exibir a tela de cadastro
+void tela_Jogar(const vector<string> &nomesJogadores, const vector<string> &coresJogadores)
+{
+    system("cls"); // Limpa o console antes de exibir a tela de cadastro
 
-//     tempoInicial = time(nullptr);
+    tempoInicial = time(nullptr);
 
-//     cout << "\033[1;31m===========================\033[0m TELA DO JOGO \033[1;31m===========================\033[0m" << endl;
+    cout << "\033[1;31m===========================\033[0m TELA DO JOGO \033[1;31m===========================\033[0m" << endl;
 
-//     cout << "*" << endl;
-//     cout << "**             |V| | |             **" << endl;
-//     cout << "**             | |\033[31m#\033[0m|\033[31m#\033[0m|             **" << endl;
-//     cout << "**     |\033[32m#\033[0m|\033[32m#\033[0m|   | |\033[31m#\033[0m| |   |\033[31m#\033[0m|\033[31m#\033[0m|     **" << endl;
-//     cout << "**     |\033[32m#\033[0m|\033[32m#\033[0m|   |C|\033[31m#\033[0m| |   |\033[31m#\033[0m|\033[31m#\033[0m|     **" << endl;
-//     cout << "**             | |\033[31m#\033[0m| |             **" << endl;
-//     cout << "**             |_|\033[31m#\033[0m|V|             **" << endl;
-//     cout << "** | |\033[32m#\033[0m| | | |V|  \033[31m#\033[0m  | | |C| | |V| **" << endl;
-//     cout << "** | |\033[32m#\033[0m|\033[32m#\033[0m|\033[32m#\033[0m|\033[32m#\033[0m|\033[32m#\033[0m|\033[32m#\033[0m W \033[34m#\033[0m|\033[34m#\033[0m|\033[34m#\033[0m|\033[34m#\033[0m|\033[34m#\033[0m|\033[34m#\033[0m| | **" << endl;
-//     cout << "** |V| | |C| | |_ \033[33m#\033[0m _|V| | | |\033[34m#\033[0m| | **" << endl;
-//     cout << "**             |V|\033[33m#\033[0m| |             **" << endl;
-//     cout << "**             | |\033[33m#\033[0m| |             **" << endl;
-//     cout << "**     |\033[33m#\033[0m|\033[33m#\033[0m|   | |\033[33m#\033[0m|C|   |\033[34m#\033[0m|\033[34m#\033[0m|     **" << endl;
-//     cout << "**     |\033[33m#\033[0m|\033[33m#\033[0m|   | |\033[33m#\033[0m| |   |\033[34m#\033[0m|\033[34m#\033[0m|     **" << endl;
-//     cout << "**             |\033[33m#\033[0m|\033[33m#\033[0m| |             **" << endl;
-//     cout << "**             | | |V|             **" << endl;
-//     cout << "*" << endl;
+    cout << "*" << endl;
+    cout << "**             |V| | |             **" << endl;
+    cout << "**             | |\033[31m#\033[0m|\033[31m#\033[0m|             **" << endl;
+    cout << "**     |\033[32m#\033[0m|\033[32m#\033[0m|   | |\033[31m#\033[0m| |   |\033[31m#\033[0m|\033[31m#\033[0m|     **" << endl;
+    cout << "**     |\033[32m#\033[0m|\033[32m#\033[0m|   |C|\033[31m#\033[0m| |   |\033[31m#\033[0m|\033[31m#\033[0m|     **" << endl;
+    cout << "**             | |\033[31m#\033[0m| |             **" << endl;
+    cout << "**             |_|\033[31m#\033[0m|V|             **" << endl;
+    cout << "** | |\033[32m#\033[0m| | | |V|  \033[31m#\033[0m  | | |C| | |V| **" << endl;
+    cout << "** | |\033[32m#\033[0m|\033[32m#\033[0m|\033[32m#\033[0m|\033[32m#\033[0m|\033[32m#\033[0m|\033[32m#\033[0m W \033[34m#\033[0m|\033[34m#\033[0m|\033[34m#\033[0m|\033[34m#\033[0m|\033[34m#\033[0m|\033[34m#\033[0m| | **" << endl;
+    cout << "** |V| | |C| | |_ \033[33m#\033[0m _|V| | | |\033[34m#\033[0m| | **" << endl;
+    cout << "**             |V|\033[33m#\033[0m| |             **" << endl;
+    cout << "**             | |\033[33m#\033[0m| |             **" << endl;
+    cout << "**     |\033[33m#\033[0m|\033[33m#\033[0m|   | |\033[33m#\033[0m|C|   |\033[34m#\033[0m|\033[34m#\033[0m|     **" << endl;
+    cout << "**     |\033[33m#\033[0m|\033[33m#\033[0m|   | |\033[33m#\033[0m| |   |\033[34m#\033[0m|\033[34m#\033[0m|     **" << endl;
+    cout << "**             |\033[33m#\033[0m|\033[33m#\033[0m| |             **" << endl;
+    cout << "**             | | |V|             **" << endl;
+    cout << "*" << endl;
 
-//     // Inicialização das posições das peças dos jogadores
-//     int posicaoJogador1 = 0;
-//     int posicaoJogador2 = 0;
-//     // Adicione mais posições para mais jogadores, se necessário
+    // Inicialização das posições das peças dos jogadores
+    int posicaoJogador1 = 0;
+    int posicaoJogador2 = 0;
+    // Adicione mais posições para mais jogadores, se necessário
 
-//     int partidaFinalizada = 0;
+    int partidaFinalizada = 0;
 
-//     do
-//     {
-//         // Mostrar o tempo na tela
-//         Tela_Jogar_MostrarTempoNaTela();
+    do
+    {
+        // Mostrar o tempo na tela
+        Tela_Jogar_MostrarTempoNaTela();
 
-//         // Simulação do lançamento do dado
-//         int resultadoDado = rolarDado();
-//         cout << "Resultado do dado: " << resultadoDado << endl;
+        // Simulação do lançamento do dado
+        int resultadoDado = rolarDado();
+        cout << "Resultado do dado: " << resultadoDado << endl;
 
-//         // Lógica para mover as peças dos jogadores com base no resultado do dado
-//         if (resultadoDado == 1 || resultadoDado == 6)
-//         {
-//             // Se o jogador tirar 1 ou 6, pode mover uma peça do início do tabuleiro
-//             posicaoJogador1++;
-//         }
+        // Lógica para mover as peças dos jogadores com base no resultado do dado
+        if (resultadoDado == 1 || resultadoDado == 6)
+        {
+            // Se o jogador tirar 1 ou 6, pode mover uma peça do início do tabuleiro
+            posicaoJogador1++;
+        }
 
-//         // Verificar se o jogador 1 venceu
-//         if (posicaoJogador1 >= 100)
-//         {
-//             cout << "Jogador 1 venceu!" << endl;
-//             partidaFinalizada = 1;
-//             break;
-//         }
+        // Verificar se o jogador 1 venceu
+        if (posicaoJogador1 >= 100)
+        {
+            cout << "Jogador 1 venceu!" << endl;
+            partidaFinalizada = 1;
+            break;
+        }
 
-//         // Simular movimento do jogador 2
-//         if (resultadoDado == 1 || resultadoDado == 6)
-//         {
-//             // Se o jogador tirar 1 ou 6, pode mover uma peça do início do tabuleiro
-//             posicaoJogador2++;
-//         }
+        // Simular movimento do jogador 2
+        if (resultadoDado == 1 || resultadoDado == 6)
+        {
+            // Se o jogador tirar 1 ou 6, pode mover uma peça do início do tabuleiro
+            posicaoJogador2++;
+        }
 
-//         // Verificar se o jogador 2 venceu
-//         if (posicaoJogador2 >= 100)
-//         {
-//             cout << "Jogador 2 venceu!" << endl;
-//             partidaFinalizada = 1;
-//             break;
-//         }
+        // Verificar se o jogador 2 venceu
+        if (posicaoJogador2 >= 100)
+        {
+            cout << "Jogador 2 venceu!" << endl;
+            partidaFinalizada = 1;
+            break;
+        }
 
-//         // Mostrar o estado atual do tabuleiro, com as posições das peças dos jogadores
+        // Mostrar o estado atual do tabuleiro, com as posições das peças dos jogadores
 
-//         cout << "1- Jogar novamente" << endl;
-//         cout << "2- Voltar para o Menu" << endl;
-//         cout << "3- Sair" << endl;
-//         cin >> partidaFinalizada;
+        cout << "1- Jogar novamente" << endl;
+        cout << "2- Voltar para o Menu" << endl;
+        cout << "3- Sair" << endl;
+        cin >> partidaFinalizada;
 
-//         if (partidaFinalizada == 1)
-//         {
-//             // O jogo continua
-//         }
-//         else if (partidaFinalizada == 2)
-//         {
-//             tela_Menu();
-//             break;
-//         }
-//         else if (partidaFinalizada == 3)
-//         {
-//             tela_Login();
-//             break;
-//         }
-//         else
-//         {
-//             cout << "Opcao Invalida" << endl;
-//         }
+        if (partidaFinalizada == 1)
+        {
+            // O jogo continua
+        }
+        else if (partidaFinalizada == 2)
+        {
+            tela_Menu();
+            break;
+        }
+        else if (partidaFinalizada == 3)
+        {
+            tela_Login();
+            break;
+        }
+        else
+        {
+            cout << "Opcao Invalida" << endl;
+        }
 
-//     } while (partidaFinalizada != 3);
-// }
+    } while (partidaFinalizada != 3);
+}
 
 
 void tela_Ranking()

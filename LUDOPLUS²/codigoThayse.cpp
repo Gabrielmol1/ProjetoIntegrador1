@@ -4,10 +4,64 @@
 #include <random>
 #include <ctime>
 #include <limits>
+#ifdef _WIN32
+#include <conio.h>
+#else
+#include <termios.h>
+#include <unistd.h>
+#endif
 
 const int TAMANHO_TABULEIRO = 15;
 
-// Funcao para inicializar o tabuleiro do Ludo
+// Cores para o tabuleiro
+#define RESET   "\033[0m"
+#define BLACK   "\033[30m"
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define YELLOW  "\033[33m"
+#define BLUE    "\033[34m"
+#define MAGENTA "\033[35m"
+#define CYAN    "\033[36m"
+#define WHITE   "\033[37m"
+#define BOLDBLACK   "\033[1m\033[30m"
+#define BOLDRED     "\033[1m\033[31m"
+#define BOLDGREEN   "\033[1m\033[32m"
+#define BOLDYELLOW  "\033[1m\033[33m"
+#define BOLDBLUE    "\033[1m\033[34m"
+#define BOLDMAGENTA "\033[1m\033[35m"
+#define BOLDCYAN    "\033[1m\033[36m"
+#define BOLDWHITE   "\033[1m\033[37m"
+
+// Função para limpar a tela
+void limparTela() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
+// Função para ler uma tecla sem bloquear a execução
+int lerTecla() {
+#ifdef _WIN32
+    if (kbhit()) {
+        return getch();
+    }
+    return 0;
+#else
+    struct termios oldt, newt;
+    int ch;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    ch = getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    return ch;
+#endif
+}
+
+// Função para inicializar o tabuleiro do Ludo
 std::vector<std::vector<char>> inicializarTabuleiroLudo() {
     std::vector<std::vector<char>> tabuleiro(TAMANHO_TABULEIRO, std::vector<char>(TAMANHO_TABULEIRO, ' '));
 
@@ -25,36 +79,35 @@ std::vector<std::vector<char>> inicializarTabuleiroLudo() {
         tabuleiro[6][6 - i] = '.';
         tabuleiro[8 + i][8] = '.'; // Caminho do jogador 3
         tabuleiro[8][8 + i] = '.';
-        tabuleiro[8 + i][6] = '.';
+        tabuleiro[8 + i][6] = '.'; 
         tabuleiro[8][6 - i] = '.'; // Caminho do jogador 2
-        tabuleiro[6 - i][8] = '.';
+        tabuleiro[6 - i][8] = '.'; 
         tabuleiro[6][8 + i] = '.'; // Caminho do jogador 4
+        
+        // Correções
         tabuleiro[1][7] = '.';
         tabuleiro[7][1] = '.';
         tabuleiro[7][13] = '.';
         tabuleiro[13][7] = '.';
     }
 
-    // Pecas do jogador 1
-    tabuleiro[3][3] = '1';
+    // Define as peças de cada jogador com cores diferentes
+    tabuleiro[3][3] = '1';  // Jogador 1 (Vermelho)
     tabuleiro[4][3] = '1';
     tabuleiro[4][4] = '1';
     tabuleiro[3][4] = '1';
 
-    // Pecas do jogador 2
-    tabuleiro[3][10] = '2';
+    tabuleiro[3][10] = '2'; // Jogador 2 (Azul)
     tabuleiro[3][11] = '2';
     tabuleiro[4][10] = '2';
     tabuleiro[4][11] = '2';
 
-    // Pecas do jogador 3
-    tabuleiro[10][3] = '3';
+    tabuleiro[10][3] = '3'; // Jogador 3 (Amarelo)
     tabuleiro[11][3] = '3';
     tabuleiro[10][4] = '3';
     tabuleiro[11][4] = '3';
 
-    // Pecas do jogador 4
-    tabuleiro[10][10] = '4';
+    tabuleiro[10][10] = '4'; // Jogador 4 (Verde)
     tabuleiro[10][11] = '4';
     tabuleiro[11][10] = '4';
     tabuleiro[11][11] = '4';
@@ -62,26 +115,46 @@ std::vector<std::vector<char>> inicializarTabuleiroLudo() {
     // Definindo o centro e areas de inicio
     tabuleiro[7][7] = '*'; // Centro
 
-    // Areas de inicio para cada jogador corrigidas
-    tabuleiro[1][1] = '1';       // Area de inicio do Jogador 1
-    tabuleiro[1][13] = '2';      // Area de inicio do Jogador 2
-    tabuleiro[13][1] = '3';      // Area de inicio do Jogador 3
-    tabuleiro[13][13] = '4';     // Area de inicio do Jogador 4
+    // Areas de inicio para cada jogador
+    tabuleiro[1][1] = 'A';       // Area de inicio do Jogador 1
+    tabuleiro[1][13] = 'B';      // Area de inicio do Jogador 2
+    tabuleiro[13][1] = 'C';      // Area de inicio do Jogador 3
+    tabuleiro[13][13] = 'D';     // Area de inicio do Jogador 4
 
     return tabuleiro;
 }
 
-// Funcao para imprimir o tabuleiro do Ludo
+// Função para imprimir o tabuleiro do Ludo com cores para cada jogador
 void imprimirTabuleiro(const std::vector<std::vector<char>>& tabuleiro) {
+    limparTela(); 
     for (int i = 0; i < TAMANHO_TABULEIRO; ++i) {
         for (int j = 0; j < TAMANHO_TABULEIRO; ++j) {
-            std::cout << std::setw(2) << tabuleiro[i][j];
+            // Define a cor da casa do tabuleiro
+            if ((i == 0 && j == 0) || (i == 14 && j == 14) || (i == 0 && j == 14) || (i == 14 && j == 0) ||
+                (i == 1 && j == 1) || (i == 13 && j == 13) || (i == 1 && j == 13) || (i == 13 && j == 1)) {
+                std::cout << BOLDGREEN << std::setw(2) << tabuleiro[i][j] << RESET; 
+            } else if ((i >= 1 && i <= 6) && (j >= 1 && j <= 6) ||
+                       (i >= 9 && i <= 14) && (j >= 9 && j <= 14) ||
+                       (i >= 1 && i <= 6) && (j >= 9 && j <= 14) ||
+                       (i >= 9 && i <= 14) && (j >= 1 && j <= 6)) {
+                std::cout << BOLDYELLOW << std::setw(2) << tabuleiro[i][j] << RESET; 
+            } else if (tabuleiro[i][j] == '1') {
+                std::cout << BOLDRED << std::setw(2) << tabuleiro[i][j] << RESET; // Jogador 1 - Vermelho
+            } else if (tabuleiro[i][j] == '2') {
+                std::cout << BOLDBLUE << std::setw(2) << tabuleiro[i][j] << RESET;  // Jogador 2 - Azul
+            } else if (tabuleiro[i][j] == '3') {
+                std::cout << BOLDYELLOW << std::setw(2) << tabuleiro[i][j] << RESET; // Jogador 3 - Amarelo
+            } else if (tabuleiro[i][j] == '4') {
+                std::cout << BOLDGREEN << std::setw(2) << tabuleiro[i][j] << RESET;  // Jogador 4 - Verde
+            } else {
+                std::cout << BOLDBLACK << std::setw(2) << tabuleiro[i][j] << RESET; 
+            }
         }
         std::cout << std::endl;
     }
 }
 
-// Funcao para rolar o dado
+// Função para rolar o dado
 int rolarDado() {
     static std::random_device rd;
     static std::mt19937 gen(rd());
@@ -90,156 +163,156 @@ int rolarDado() {
     return dis(gen);
 }
 
-// Funcao para mudar a vez do jogador
+// Função para mudar a vez do jogador
 void mudarVez(int& jogadorAtual) {
-    jogadorAtual = (jogadorAtual % 4) + 1; // Muda para o proximo jogador (de 1 a 4)
+    jogadorAtual = (jogadorAtual % 4) + 1; // Muda para o próximo jogador (de 1 a 4)
 }
 
-// Funcao para exibir a vez do jogador atual
+// Função para exibir a vez do jogador atual
 void exibirJogadorAtual(int jogadorAtual) {
-    std::cout << "Jogador " << jogadorAtual << ", e sua vez de jogar." << std::endl;
+    std::cout << "Jogador " << jogadorAtual << ", é sua vez de jogar." << std::endl;
 }
 
-// Funcao para mover uma peca da base para o tabuleiro
+// Função para mover uma peça da base para o tabuleiro
 bool moverPecaDaBase(int jogadorAtual, std::vector<std::vector<char>>& tabuleiro, int resultadoDado) {
     int linhaAlvo, colunaAlvo;
     bool pecaMovida = false;
 
-    // Determinar as posicoes alvo com base no jogador atual
+    // Determinar as posições alvo com base no jogador atual
     switch (jogadorAtual) {
-    case 1:
-        linhaAlvo = 6;
-        colunaAlvo = 2;
-        break;
-    case 2:
-        linhaAlvo = 2;
-        colunaAlvo = 8;
-        break;
-    case 3:
-        linhaAlvo = 12;
-        colunaAlvo = 6;
-        break;
-    case 4:
-        linhaAlvo = 8;
-        colunaAlvo = 12;
-        break;
-    default:
-        std::cerr << "Erro: Jogador invalido!" << std::endl;
-        return false;
+        case 1:
+            linhaAlvo = 6;
+            colunaAlvo = 2;
+            break;
+        case 2:
+            linhaAlvo = 2;
+            colunaAlvo = 8;
+            break;
+        case 3:
+            linhaAlvo = 12;
+            colunaAlvo = 6;
+            break;
+        case 4:
+            linhaAlvo = 8;
+            colunaAlvo = 12;
+            break;
+        default:
+            std::cerr << "Erro: Jogador inválido!" << std::endl;
+            return false;
     }
 
-    // Verificar se o resultado do dado e igual a 6
+    // Verificar se o resultado do dado é igual a 6
     if (resultadoDado != 6) {
-        std::cerr << "Voce precisa tirar 6 para mover uma peca da base para o tabuleiro." << std::endl;
+        std::cout << "Você precisa tirar 6 para mover uma peça da base para o tabuleiro." << std::endl;
         return false;
     }
 
-    // Verificar a posicao da peca na base e mover uma peca
+    // Verificar se a posição alvo está livre
+    if (tabuleiro[linhaAlvo][colunaAlvo] != '.') {
+        std::cout << "A posição alvo já está ocupada." << std::endl;
+        return false;
+    }
+
+    // Encontrar uma peça na base do jogador e movê-la
     for (int i = 0; i < TAMANHO_TABULEIRO && !pecaMovida; ++i) {
         for (int j = 0; j < TAMANHO_TABULEIRO && !pecaMovida; ++j) {
-            // Condicoes especificas para encontrar pecas na base inicial de cada jogador
-            if (tabuleiro[i][j] == '0' + jogadorAtual && (
-                (jogadorAtual == 1 && (i == 3 || i == 4) && (j == 3 || j == 4)) ||
-                (jogadorAtual == 2 && (i == 3 || i == 4) && (j == 10 || j == 11)) ||
-                (jogadorAtual == 3 && (i == 10 || i == 11) && (j == 3 || j == 4)) ||
-                (jogadorAtual == 4 && (i == 10 || i == 11) && (j == 10 || j == 11))
-                )) {
-                tabuleiro[i][j] = ' '; // Remover a peca da posicao anterior
-                tabuleiro[linhaAlvo][colunaAlvo] = '0' + jogadorAtual; // Mover a peca da base para a posicao alvo
+            if (tabuleiro[i][j] == '0' + jogadorAtual) {
+                tabuleiro[i][j] = ' '; // Remover a peça da base
+                tabuleiro[linhaAlvo][colunaAlvo] = '0' + jogadorAtual; // Mover a peça para o tabuleiro
                 pecaMovida = true;
-                std::cout << "Jogador " << jogadorAtual << " moveu uma peca para [" << linhaAlvo << "][" << colunaAlvo << "]." << std::endl;
+                std::cout << "Jogador " << jogadorAtual << " moveu uma peça da base para o tabuleiro." << std::endl;
                 break;
             }
         }
     }
 
-    if (!pecaMovida) {
-        std::cerr << "Nao ha pecas na base para mover." << std::endl;
-    }
-
     return pecaMovida;
 }
 
+// Função para mover uma peça no tabuleiro
 void moverPecaNoTabuleiro(int jogadorAtual, std::vector<std::vector<char>>& tabuleiro, int resultadoDado) {
-    std::vector<std::pair<int, int>> posicoesValidas;
+    int linhaAtual, colunaAtual, linhaAlvo, colunaAlvo;
+    bool pecaEncontrada = false;
 
-    // Percorre o tabuleiro e encontra todas as posições válidas para mover uma peça
-    for (int i = 0; i < TAMANHO_TABULEIRO; ++i) {
-        for (int j = 0; j < TAMANHO_TABULEIRO; ++j) {
+    // Encontrar a peça do jogador no tabuleiro
+    for (int i = 0; i < TAMANHO_TABULEIRO && !pecaEncontrada; ++i) {
+        for (int j = 0; j < TAMANHO_TABULEIRO && !pecaEncontrada; ++j) {
             if (tabuleiro[i][j] == '0' + jogadorAtual) {
-                posicoesValidas.push_back(std::make_pair(i, j));
+                linhaAtual = i;
+                colunaAtual = j;
+                pecaEncontrada = true;
+                break;
             }
         }
     }
 
-    // Verifica se há pelo menos uma peça para mover
-    if (posicoesValidas.empty()) {
-        std::cerr << "Erro: O jogador " << jogadorAtual << " nao tem pecas no tabuleiro para mover." << std::endl;
+    // Verificar se uma peça foi encontrada
+    if (!pecaEncontrada) {
+        std::cout << "O jogador " << jogadorAtual << " não possui peças no tabuleiro para mover." << std::endl;
         return;
     }
 
-    // Escolhe aleatoriamente uma das posições válidas
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, posicoesValidas.size() - 1);
-    int indice = dis(gen);
-    int linha = posicoesValidas[indice].first;
-    int coluna = posicoesValidas[indice].second;
-
-    // Move a peça para frente de acordo com o valor do dado
+    // Calcular a posição alvo com base no resultado do dado
+    linhaAlvo = linhaAtual;
+    colunaAlvo = colunaAtual;
     for (int i = 0; i < resultadoDado; ++i) {
         // Lógica para mover a peça dependendo do caminho do tabuleiro
         // (neste exemplo, está apenas movendo a peça para a direita)
-        if (coluna + 1 < TAMANHO_TABULEIRO) {
-            tabuleiro[linha][coluna + 1] = tabuleiro[linha][coluna];
-            tabuleiro[linha][coluna] = ' ';
-            coluna++;
+        if (colunaAlvo + 1 < TAMANHO_TABULEIRO) {
+            colunaAlvo++;
         } else {
             // Se a peça chegou ao final do tabuleiro, retorna à área inicial
-            tabuleiro[linha][coluna] = '0' + jogadorAtual;
-            break;
+            colunaAlvo = 0;
         }
     }
 
-    // Atualiza o tabuleiro após mover a peça
-    imprimirTabuleiro(tabuleiro);
+    // Verificar se a posição alvo está livre
+    if (tabuleiro[linhaAlvo][colunaAlvo] != '.' && tabuleiro[linhaAlvo][colunaAlvo] != '0' + jogadorAtual) {
+        std::cout << "A posição alvo está ocupada." << std::endl;
+        return;
+    }
+
+    // Mover a peça para a posição alvo
+    tabuleiro[linhaAtual][colunaAtual] = ' ';
+    tabuleiro[linhaAlvo][colunaAlvo] = '0' + jogadorAtual;
+    std::cout << "Jogador " << jogadorAtual << " moveu uma peça para [" << linhaAlvo << "][" << colunaAlvo << "]." << std::endl;
 }
 
 int main() {
     int jogadorAtual = 1;
     std::vector<std::vector<char>> tabuleiroLudo = inicializarTabuleiroLudo();
+    int resultadoDado; 
 
     while (true) {
         imprimirTabuleiro(tabuleiroLudo);
         exibirJogadorAtual(jogadorAtual);
 
         std::cout << "Pressione Enter para rolar o dado..." << std::endl;
-        std::cin.get();
-
-        int resultadoDado = rolarDado();
+        while (lerTecla() != 10) {} // Aguarda o pressionamento da tecla Enter (código ASCII 10)
+        
+        resultadoDado = rolarDado();
         std::cout << "O dado rolou: " << resultadoDado << std::endl;
 
         bool jogarNovamente = false;
 
         if (resultadoDado == 6) {
             jogarNovamente = moverPecaDaBase(jogadorAtual, tabuleiroLudo, resultadoDado);
+            imprimirTabuleiro(tabuleiroLudo);
+            if (jogarNovamente){
+                std::cout << "Jogue novamente!" << std::endl; 
+            }
         }
         else {
-            std::cout << "Voce nao tirou 6, movendo uma peca no tabuleiro..." << std::endl;
             moverPecaNoTabuleiro(jogadorAtual, tabuleiroLudo, resultadoDado);
+            imprimirTabuleiro(tabuleiroLudo); 
         }
 
-        // Se o jogador tirou um 6 e moveu uma peça da base para o tabuleiro, ele joga novamente
-        if (resultadoDado == 6 && jogarNovamente) {
-            imprimirTabuleiro(tabuleiroLudo);
-            std::cout << "Pressione Enter para rolar o dado novamente..." << std::endl;
-            std::cin.get();
-            resultadoDado = rolarDado();
-            std::cout << "O dado rolou: " << resultadoDado << std::endl;
+        if (!jogarNovamente) {
+            mudarVez(jogadorAtual); 
         }
-
-        // Mudar para o proximo jogador
-        mudarVez(jogadorAtual);
+        
+        // Pequena pausa para visualização
+        usleep(1000000); 
     }
 
     return 0;
