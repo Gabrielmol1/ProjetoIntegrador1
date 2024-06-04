@@ -1,319 +1,273 @@
 #include <iostream>
 #include <vector>
-#include <iomanip>
-#include <random>
+#include <unordered_map>
 #include <ctime>
-#include <limits>
-#ifdef _WIN32
-#include <conio.h>
-#else
-#include <termios.h>
-#include <unistd.h>
-#endif
+#include <cstdlib>
+#include <unistd.h> // Para a função sleep
+#include <cstdlib> // Para a função system
+
+using namespace std;
 
 const int TAMANHO_TABULEIRO = 15;
+const int CENTRO_TABULEIRO = 7;
 
-// Cores para o tabuleiro
-#define RESET   "\033[0m"
-#define BLACK   "\033[30m"
-#define RED     "\033[31m"
-#define GREEN   "\033[32m"
-#define YELLOW  "\033[33m"
-#define BLUE    "\033[34m"
-#define MAGENTA "\033[35m"
-#define CYAN    "\033[36m"
-#define WHITE   "\033[37m"
-#define BOLDBLACK   "\033[1m\033[30m"
-#define BOLDRED     "\033[1m\033[31m"
-#define BOLDGREEN   "\033[1m\033[32m"
-#define BOLDYELLOW  "\033[1m\033[33m"
-#define BOLDBLUE    "\033[1m\033[34m"
-#define BOLDMAGENTA "\033[1m\033[35m"
-#define BOLDCYAN    "\033[1m\033[36m"
-#define BOLDWHITE   "\033[1m\033[37m"
+// Estrutura para representar uma célula no tabuleiro
+struct Celula {
+    int linha;
+    int coluna;
 
-// Função para limpar a tela
-void limparTela() {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
-}
+    Celula(int l = -1, int c = -1) : linha(l), coluna(c) {}
+};
 
-// Função para ler uma tecla sem bloquear a execução
-int lerTecla() {
-#ifdef _WIN32
-    if (kbhit()) {
-        return getch();
+// Função para imprimir o tabuleiro com os caminhos dos peões
+void imprimirTabuleiroColorido(const vector<vector<char>>& tabuleiro) {
+    //percursos
+    unordered_map<char, string> cores_min = {
+        {'r', "\033[1;31m"},  // Vermelho
+        {'b', "\033[1;34m"},  // Azul
+        {'y', "\033[1;33m"},  // Amarelo
+        {'g', "\033[1;32m"},  // Verde
+        {';', "\033[1;35m"},  // Roxo
+        {':', "\033[1;38;5;208m"}  // Laranja
+    };
+    //peões 
+    unordered_map<char, string> cores_mai = {
+        {'R', "\033[1;31m"},  // Vermelho
+        {'B', "\033[1;34m"},  // Azul
+        {'Y', "\033[1;33m"},  // Amarelo
+        {'G', "\033[1;32m"},  // Verde
+    };
+    //tabuleiro
+    for (const auto& linha : tabuleiro) {
+        for (char celula : linha) {
+            if (cores_min.find(celula) != cores_min.end()) {
+                cout << cores_min[celula] << celula << "\033[0m ";
+            } else if (cores_mai.find(celula) != cores_mai.end()) {
+                cout << cores_mai[celula] << celula << "\033[0m ";
+            } else {
+                cout << celula << " ";
+            }
+        }
+        cout << endl;
     }
-    return 0;
-#else
-    struct termios oldt, newt;
-    int ch;
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    ch = getchar();
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    return ch;
-#endif
 }
 
-// Função para inicializar o tabuleiro do Ludo
-std::vector<std::vector<char>> inicializarTabuleiroLudo() {
-    std::vector<std::vector<char>> tabuleiro(TAMANHO_TABULEIRO, std::vector<char>(TAMANHO_TABULEIRO, ' '));
-
-    // Caminhos neutros verticais e horizontais
+// Função para criar e inicializar o tabuleiro com os caminhos dos peões e as casas de saída
+vector<vector<char>> criarTabuleiro() {
+    vector<vector<char>> tabuleiro(TAMANHO_TABULEIRO, vector<char>(TAMANHO_TABULEIRO, ' '));
+    // bordas do tabuleiro 
+    for (int i = 0; i < TAMANHO_TABULEIRO; ++i) {
+        tabuleiro[0][i] = '*';  // Linha superior
+        tabuleiro[TAMANHO_TABULEIRO - 1][i] = '*';  // Linha inferior
+        tabuleiro[i][0] = '*';  // Coluna esquerda
+        tabuleiro[i][TAMANHO_TABULEIRO - 1] = '*';  // Coluna direita
+    }
+    //onde andam os peões
     for (int i = 1; i < TAMANHO_TABULEIRO - 1; ++i) {
-        if (i != 7) { // Evita o centro
-            tabuleiro[7][i] = '-';
-            tabuleiro[i][7] = '|';
+        if (i < TAMANHO_TABULEIRO - 1) {
+            tabuleiro[i][6] = '.';
+        }
+        if (i == 2) {
+            tabuleiro[i - 1][7] = '.';
+        }
+        if (i == 2) {
+            tabuleiro[TAMANHO_TABULEIRO - i][7] = '.';
+        }
+        if (i < TAMANHO_TABULEIRO - 1) {
+            tabuleiro[i][8] = '.';
         }
     }
 
-    // Caminhos especiais para cada jogador
-    for (int i = 0; i < 6; ++i) {
-        tabuleiro[6 - i][6] = '.'; // Caminho do jogador 1
-        tabuleiro[6][6 - i] = '.';
-        tabuleiro[8 + i][8] = '.'; // Caminho do jogador 3
-        tabuleiro[8][8 + i] = '.';
-        tabuleiro[8 + i][6] = '.'; 
-        tabuleiro[8][6 - i] = '.'; // Caminho do jogador 2
-        tabuleiro[6 - i][8] = '.'; 
-        tabuleiro[6][8 + i] = '.'; // Caminho do jogador 4
-        
-        // Correções
-        tabuleiro[1][7] = '.';
-        tabuleiro[7][1] = '.';
-        tabuleiro[7][13] = '.';
-        tabuleiro[13][7] = '.';
+    for (int i = 1; i < TAMANHO_TABULEIRO - 1; ++i) {
+        if (i < TAMANHO_TABULEIRO - 1) {
+            tabuleiro[6][i] = '.';
+        }
+        if (i == 1) {
+            tabuleiro[7][i] = '.';
+        }
+        if (i == 2) {
+            tabuleiro[7][TAMANHO_TABULEIRO - i] = '.';
+        }
+        if (i < TAMANHO_TABULEIRO - 1) {
+            tabuleiro[8][i] = '.';
+        }
     }
-
-    // Define as peças de cada jogador com cores diferentes
-    tabuleiro[3][3] = '1';  // Jogador 1 (Vermelho)
-    tabuleiro[4][3] = '1';
-    tabuleiro[4][4] = '1';
-    tabuleiro[3][4] = '1';
-
-    tabuleiro[3][10] = '2'; // Jogador 2 (Azul)
-    tabuleiro[3][11] = '2';
-    tabuleiro[4][10] = '2';
-    tabuleiro[4][11] = '2';
-
-    tabuleiro[10][3] = '3'; // Jogador 3 (Amarelo)
-    tabuleiro[11][3] = '3';
-    tabuleiro[10][4] = '3';
-    tabuleiro[11][4] = '3';
-
-    tabuleiro[10][10] = '4'; // Jogador 4 (Verde)
-    tabuleiro[10][11] = '4';
-    tabuleiro[11][10] = '4';
-    tabuleiro[11][11] = '4';
-
-    // Definindo o centro e areas de inicio
-    tabuleiro[7][7] = '*'; // Centro
-
-    // Areas de inicio para cada jogador
-    tabuleiro[1][1] = 'A';       // Area de inicio do Jogador 1
-    tabuleiro[1][13] = 'B';      // Area de inicio do Jogador 2
-    tabuleiro[13][1] = 'C';      // Area de inicio do Jogador 3
-    tabuleiro[13][13] = 'D';     // Area de inicio do Jogador 4
-
+    //estrutura das bases 
+    //vermelho 
+    tabuleiro[2][3] = '|';
+    tabuleiro[4][3] = '|';
+    tabuleiro[3][2] = '-';
+    tabuleiro[3][3] = '+';
+    tabuleiro[3][4] = '-';
+    //azul
+    tabuleiro[2][11] = '|';
+    tabuleiro[4][11] = '|';
+    tabuleiro[3][10] = '-';
+    tabuleiro[3][11] = '+';
+    tabuleiro[3][12] = '-';
+    //verde 
+    tabuleiro[10][3] = '|';
+    tabuleiro[12][3] = '|';
+    tabuleiro[11][2] = '-';
+    tabuleiro[11][3] = '+';
+    tabuleiro[11][4] = '-';
+    //amarelo
+    tabuleiro[10][11] = '|';
+    tabuleiro[12][11] = '|';
+    tabuleiro[11][10] = '-';
+    tabuleiro[11][11] = '+';
+    tabuleiro[11][12] = '-';
+    //casas iniciais
+    tabuleiro[6][2] = 'r';  // Linha 6, Coluna 2
+    tabuleiro[2][8] = 'b';  // Linha 2, Coluna 8
+    tabuleiro[8][12] = 'y'; // Linha 8, Coluna 12
+    tabuleiro[12][6] = 'g'; // Linha 12, Coluna 6
+    //zonas seguras - reta final de cada cor
+    for (int i = 2; i <= 6; ++i) {
+        tabuleiro[7][i] = 'r'; // Linha 7, Colunas 2 a 6
+        tabuleiro[i][7] = 'b'; // Coluna 7, Linhas 2 a 6
+    }
+    for (int i = 8; i <= 12; ++i) {
+        tabuleiro[7][i] = 'y'; // Linha 7, Colunas 8 a 12
+        tabuleiro[i][7] = 'g'; // Coluna 7, Linhas 8 a 12
+    }
+    //casa coroa
+    tabuleiro[8][4] = ':';   // Linha 8, Coluna 4
+    tabuleiro[4][6] = ':';   // Linha 4, Coluna 6
+    tabuleiro[6][10] = ':';  // Linha 6, Coluna 10
+    tabuleiro[10][8] = ':';  // Linha 10, Coluna 8
+    //casa vingança 
+    tabuleiro[8][1] = ';';   // Linha 8, Coluna 1
+    tabuleiro[1][6] = ';';   // Linha 1, Coluna 6
+    tabuleiro[6][13] = ';';  // Linha 6, Coluna 13
+    tabuleiro[13][8] = ';';  // Linha 13, Coluna 8
+    // Casas seguras - peão fica após chegar ao fim F
+    // Vermelho
+    tabuleiro[1][1] = '.';
+    tabuleiro[1][2] = '.';
+    tabuleiro[1][3] = '.';
+    tabuleiro[1][4] = '.';
+    // Azul
+    tabuleiro[1][10] = '.';
+    tabuleiro[1][11] = '.';
+    tabuleiro[1][12] = '.';
+    tabuleiro[1][13] = '.';
+    // Amarelo
+    tabuleiro[13][10] = '.';
+    tabuleiro[13][11] = '.';
+    tabuleiro[13][12] = '.';
+    tabuleiro[13][13] = '.';
+    // Verde
+    tabuleiro[13][1] = '.';
+    tabuleiro[13][2] = '.';
+    tabuleiro[13][3] = '.';
+    tabuleiro[13][4] = '.';
+    //casa final
+    tabuleiro[CENTRO_TABULEIRO][CENTRO_TABULEIRO] = 'F';
+    // peões base vermelha
+    tabuleiro[2][2] = 'R';   // Linha 2, Coluna 2
+    tabuleiro[2][4] = 'R';   // Linha 2, Coluna 4
+    tabuleiro[4][2] = 'R';   // Linha 4, Coluna 2
+    tabuleiro[4][4] = 'R';   // Linha 4, Coluna 4
+    // peões base azul 
+    tabuleiro[2][10] = 'B';  // Linha 2, Coluna 10
+    tabuleiro[2][12] = 'B';  // Linha 2, Coluna 12
+    tabuleiro[4][10] = 'B';  // Linha 4, Coluna 10
+    tabuleiro[4][12] = 'B';  // Linha 4, Coluna 12
+    // peões base verde
+    tabuleiro[10][2] = 'G';  // Linha 10, Coluna 2
+    tabuleiro[10][4] = 'G';  // Linha 10, Coluna 4
+    tabuleiro[12][2] = 'G';  // Linha 12, Coluna 2
+    tabuleiro[12][4] = 'G';  // Linha 12, Coluna 4
+    // peões base amarela 
+    tabuleiro[10][10] = 'Y'; // Linha 10, Coluna 10
+    tabuleiro[10][12] = 'Y'; // Linha 10, Coluna 12
+    tabuleiro[12][10] = 'Y'; // Linha 12, Coluna 10
+    tabuleiro[12][12] = 'Y'; // Linha 12, Coluna 12
     return tabuleiro;
 }
 
-// Função para imprimir o tabuleiro do Ludo com cores para cada jogador
-void imprimirTabuleiro(const std::vector<std::vector<char>>& tabuleiro) {
-    limparTela(); 
+// Função para lançar o dado
+int lancarDado() {
+    return rand() % 6 + 1;
+}
+
+// Função para mover um peão no tabuleiro
+bool moverPeao(vector<vector<char>>& tabuleiro, char cor, int movimentos) {
+    int direcao[4][2] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    int dx = 0, dy = 0;
+    Celula peao;
+    // Encontrar a posição atual do peão
     for (int i = 0; i < TAMANHO_TABULEIRO; ++i) {
         for (int j = 0; j < TAMANHO_TABULEIRO; ++j) {
-            // Define a cor da casa do tabuleiro
-            if ((i == 0 && j == 0) || (i == 14 && j == 14) || (i == 0 && j == 14) || (i == 14 && j == 0) ||
-                (i == 1 && j == 1) || (i == 13 && j == 13) || (i == 1 && j == 13) || (i == 13 && j == 1)) {
-                std::cout << BOLDGREEN << std::setw(2) << tabuleiro[i][j] << RESET; 
-            } else if ((i >= 1 && i <= 6) && (j >= 1 && j <= 6) ||
-                       (i >= 9 && i <= 14) && (j >= 9 && j <= 14) ||
-                       (i >= 1 && i <= 6) && (j >= 9 && j <= 14) ||
-                       (i >= 9 && i <= 14) && (j >= 1 && j <= 6)) {
-                std::cout << BOLDYELLOW << std::setw(2) << tabuleiro[i][j] << RESET; 
-            } else if (tabuleiro[i][j] == '1') {
-                std::cout << BOLDRED << std::setw(2) << tabuleiro[i][j] << RESET; // Jogador 1 - Vermelho
-            } else if (tabuleiro[i][j] == '2') {
-                std::cout << BOLDBLUE << std::setw(2) << tabuleiro[i][j] << RESET;  // Jogador 2 - Azul
-            } else if (tabuleiro[i][j] == '3') {
-                std::cout << BOLDYELLOW << std::setw(2) << tabuleiro[i][j] << RESET; // Jogador 3 - Amarelo
-            } else if (tabuleiro[i][j] == '4') {
-                std::cout << BOLDGREEN << std::setw(2) << tabuleiro[i][j] << RESET;  // Jogador 4 - Verde
-            } else {
-                std::cout << BOLDBLACK << std::setw(2) << tabuleiro[i][j] << RESET; 
-            }
-        }
-        std::cout << std::endl;
-    }
-}
-
-// Função para rolar o dado
-int rolarDado() {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    static std::uniform_int_distribution<> dis(1, 6);
-
-    return dis(gen);
-}
-
-// Função para mudar a vez do jogador
-void mudarVez(int& jogadorAtual) {
-    jogadorAtual = (jogadorAtual % 4) + 1; // Muda para o próximo jogador (de 1 a 4)
-}
-
-// Função para exibir a vez do jogador atual
-void exibirJogadorAtual(int jogadorAtual) {
-    std::cout << "Jogador " << jogadorAtual << ", é sua vez de jogar." << std::endl;
-}
-
-// Função para mover uma peça da base para o tabuleiro
-bool moverPecaDaBase(int jogadorAtual, std::vector<std::vector<char>>& tabuleiro, int resultadoDado) {
-    int linhaAlvo, colunaAlvo;
-    bool pecaMovida = false;
-
-    // Determinar as posições alvo com base no jogador atual
-    switch (jogadorAtual) {
-        case 1:
-            linhaAlvo = 6;
-            colunaAlvo = 2;
-            break;
-        case 2:
-            linhaAlvo = 2;
-            colunaAlvo = 8;
-            break;
-        case 3:
-            linhaAlvo = 12;
-            colunaAlvo = 6;
-            break;
-        case 4:
-            linhaAlvo = 8;
-            colunaAlvo = 12;
-            break;
-        default:
-            std::cerr << "Erro: Jogador inválido!" << std::endl;
-            return false;
-    }
-
-    // Verificar se o resultado do dado é igual a 6
-    if (resultadoDado != 6) {
-        std::cout << "Você precisa tirar 6 para mover uma peça da base para o tabuleiro." << std::endl;
-        return false;
-    }
-
-    // Verificar se a posição alvo está livre
-    if (tabuleiro[linhaAlvo][colunaAlvo] != '.') {
-        std::cout << "A posição alvo já está ocupada." << std::endl;
-        return false;
-    }
-
-    // Encontrar uma peça na base do jogador e movê-la
-    for (int i = 0; i < TAMANHO_TABULEIRO && !pecaMovida; ++i) {
-        for (int j = 0; j < TAMANHO_TABULEIRO && !pecaMovida; ++j) {
-            if (tabuleiro[i][j] == '0' + jogadorAtual) {
-                tabuleiro[i][j] = ' '; // Remover a peça da base
-                tabuleiro[linhaAlvo][colunaAlvo] = '0' + jogadorAtual; // Mover a peça para o tabuleiro
-                pecaMovida = true;
-                std::cout << "Jogador " << jogadorAtual << " moveu uma peça da base para o tabuleiro." << std::endl;
+            if (tabuleiro[i][j] == cor) {
+                peao.linha = i;
+                peao.coluna = j;
                 break;
             }
         }
     }
-
-    return pecaMovida;
+    // Mover o peão
+    while (movimentos > 0) {
+        // Verificar se o peão chegou à casa final
+        if (peao.linha == CENTRO_TABULEIRO && peao.coluna == CENTRO_TABULEIRO) {
+            return true;
+        }
+        // Verificar a direção do movimento
+        if (peao.coluna == 6 && peao.linha > 0 && peao.linha < 6) {
+            dy = -1;
+        } else if (peao.coluna == 8 && peao.linha > 8 && peao.linha < TAMANHO_TABULEIRO) {
+            dy = 1;
+        } else if (peao.linha == 6 && peao.coluna > 0 && peao.coluna < 6) {
+            dx = -1;
+        } else if (peao.linha == 8 && peao.coluna > 8 && peao.coluna < TAMANHO_TABULEIRO) {
+            dx = 1;
+        }
+        // Atualizar a posição do peão
+        peao.linha += dx;
+        peao.coluna += dy;
+        // Atualizar o tabuleiro
+        tabuleiro[peao.linha][peao.coluna] = cor;
+        movimentos--;
+    }
+    return false;
 }
 
-// Função para mover uma peça no tabuleiro
-void moverPecaNoTabuleiro(int jogadorAtual, std::vector<std::vector<char>>& tabuleiro, int resultadoDado) {
-    int linhaAtual, colunaAtual, linhaAlvo, colunaAlvo;
-    bool pecaEncontrada = false;
-
-    // Encontrar a peça do jogador no tabuleiro
-    for (int i = 0; i < TAMANHO_TABULEIRO && !pecaEncontrada; ++i) {
-        for (int j = 0; j < TAMANHO_TABULEIRO && !pecaEncontrada; ++j) {
-            if (tabuleiro[i][j] == '0' + jogadorAtual) {
-                linhaAtual = i;
-                colunaAtual = j;
-                pecaEncontrada = true;
-                break;
-            }
-        }
-    }
-
-    // Verificar se uma peça foi encontrada
-    if (!pecaEncontrada) {
-        std::cout << "O jogador " << jogadorAtual << " não possui peças no tabuleiro para mover." << std::endl;
-        return;
-    }
-
-    // Calcular a posição alvo com base no resultado do dado
-    linhaAlvo = linhaAtual;
-    colunaAlvo = colunaAtual;
-    for (int i = 0; i < resultadoDado; ++i) {
-        // Lógica para mover a peça dependendo do caminho do tabuleiro
-        // (neste exemplo, está apenas movendo a peça para a direita)
-        if (colunaAlvo + 1 < TAMANHO_TABULEIRO) {
-            colunaAlvo++;
-        } else {
-            // Se a peça chegou ao final do tabuleiro, retorna à área inicial
-            colunaAlvo = 0;
-        }
-    }
-
-    // Verificar se a posição alvo está livre
-    if (tabuleiro[linhaAlvo][colunaAlvo] != '.' && tabuleiro[linhaAlvo][colunaAlvo] != '0' + jogadorAtual) {
-        std::cout << "A posição alvo está ocupada." << std::endl;
-        return;
-    }
-
-    // Mover a peça para a posição alvo
-    tabuleiro[linhaAtual][colunaAtual] = ' ';
-    tabuleiro[linhaAlvo][colunaAlvo] = '0' + jogadorAtual;
-    std::cout << "Jogador " << jogadorAtual << " moveu uma peça para [" << linhaAlvo << "][" << colunaAlvo << "]." << std::endl;
+// Função para realizar uma jogada
+bool realizarJogada(vector<vector<char>>& tabuleiro, char cor) {
+    // Lançar o dado
+    int movimentos = lancarDado();
+    cout << "Jogador " << cor << " tirou " << movimentos << " no dado." << endl;
+    // Mover o peão
+    return moverPeao(tabuleiro, cor, movimentos);
 }
 
+// Função para limpar a tela
+void limparTela() {
+    system("clear"); // Para sistemas Unix/Linux
+}
+
+// Função principal do jogo
 int main() {
-    int jogadorAtual = 1;
-    std::vector<std::vector<char>> tabuleiroLudo = inicializarTabuleiroLudo();
-    int resultadoDado; 
+    srand(time(0));
+    vector<vector<char>> tabuleiro = criarTabuleiro();
+    vector<char> cores = {'R', 'B', 'Y', 'G'};
+    bool jogoTerminado = false;
+    int rodada = 0;
 
-    while (true) {
-        imprimirTabuleiro(tabuleiroLudo);
-        exibirJogadorAtual(jogadorAtual);
-
-        std::cout << "Pressione Enter para rolar o dado..." << std::endl;
-        while (lerTecla() != 10) {} // Aguarda o pressionamento da tecla Enter (código ASCII 10)
-        
-        resultadoDado = rolarDado();
-        std::cout << "O dado rolou: " << resultadoDado << std::endl;
-
-        bool jogarNovamente = false;
-
-        if (resultadoDado == 6) {
-            jogarNovamente = moverPecaDaBase(jogadorAtual, tabuleiroLudo, resultadoDado);
-            imprimirTabuleiro(tabuleiroLudo);
-            if (jogarNovamente){
-                std::cout << "Jogue novamente!" << std::endl; 
-            }
-        }
-        else {
-            moverPecaNoTabuleiro(jogadorAtual, tabuleiroLudo, resultadoDado);
-            imprimirTabuleiro(tabuleiroLudo); 
-        }
-
-        if (!jogarNovamente) {
-            mudarVez(jogadorAtual); 
-        }
-        
-        // Pequena pausa para visualização
-        usleep(1000000); 
+    while (!jogoTerminado) {
+        // Limpar a tela e imprimir o tabuleiro
+        limparTela();
+        imprimirTabuleiroColorido(tabuleiro);
+        // Jogar
+        char corAtual = cores[rodada % 4];
+        jogoTerminado = realizarJogada(tabuleiro, corAtual);
+        // Aguardar um pouco antes de continuar
+        sleep(1);
+        rodada++;
     }
+
+    cout << "Jogador " << cores[(rodada - 1) % 4] << " venceu o jogo!" << endl;
 
     return 0;
 }
