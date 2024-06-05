@@ -48,6 +48,8 @@ int lancarDado();
 bool moverPeao(vector<vector<char>> &tabuleiro, char cor, int movimentos);
 vector<vector<char>> criarTabuleiro();
 bool realizarJogada(vector<vector<char>> &tabuleiro, char cor);
+bool existePecaNoTabuleiro(const vector<vector<char>> &tabuleiro, char cor);
+void retirarPecaDaToca(vector<vector<char>> &tabuleiro, char cor);
 
 // inicializacao das telas em ordem antes da main
 
@@ -452,6 +454,7 @@ int selecionarQuantidadeJogParaPartida()
     // Chamando o método selecionarJogadoresECoresParaPartida() com o número de jogadores selecionado
     selecionarJogadoresECoresParaPartida(num_jogadores);
 }
+
 void selecionarJogadoresECoresParaPartida(int num_jogadores)
 {
     limparTela();
@@ -493,11 +496,7 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
             cout << i + 1 << ". " << jogadores[i].first << "\n";
         }
 
-        vector<string> coresDisponiveis = {
-            "\033[31mVermelho\033[0m",
-            "\033[32mVerde\033[0m",
-            "\033[34mAzul\033[0m",
-            "\033[33mAmarelo\033[0m"};
+        vector<string> coresDisponiveis = {"Vermelho", "Verde", "Azul", "Amarelo"};
 
         vector<string> jogadoresSelecionados;
         vector<string> coresSelecionadas;
@@ -630,12 +629,10 @@ int lancarDado()
 {                          // Função para rolar o dado
     return rand() % 6 + 1; // Gera um número aleatório de 1 a 6
 }
-
 bool moverPeao(vector<vector<char>> &tabuleiro, char cor, int movimentos)
 {
-    int direcao[4][2] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
-    int dx = 0, dy = 0;
     Celula peao;
+    bool encontrado = false;
     // Encontrar a posição atual do peão
     for (int i = 0; i < TAMANHO_TABULEIRO; ++i)
     {
@@ -643,46 +640,66 @@ bool moverPeao(vector<vector<char>> &tabuleiro, char cor, int movimentos)
         {
             if (tabuleiro[i][j] == cor)
             {
-                peao.linha = i;
-                peao.coluna = j;
+                peao = Celula(i, j);
+                encontrado = true;
                 break;
             }
         }
+        if (encontrado)
+            break;
     }
+
+    if (!encontrado)
+    {
+        cout << "Peão da cor " << cor << " não encontrado no tabuleiro." << endl;
+        return false;
+    }
+
     // Mover o peão
     while (movimentos > 0)
     {
-        // Verificar se o peão chegou à casa final
+        int novaLinha = peao.linha, novaColuna = peao.coluna;
+
+        // Determinar a direção do movimento
+        if (peao.linha == 6 && peao.coluna < 6)
+            novaColuna++;
+        else if (peao.coluna == 6 && peao.linha > 0)
+            novaLinha--;
+        else if (peao.linha == 0 && peao.coluna < 14)
+            novaColuna++;
+        else if (peao.coluna == 14 && peao.linha < 14)
+            novaLinha++;
+        else if (peao.linha == 14 && peao.coluna > 0)
+            novaColuna--;
+        else if (peao.coluna == 0 && peao.linha > 6)
+            novaLinha--;
+        else if (peao.linha == 7 && peao.coluna < 7)
+            novaColuna++;
+        else if (peao.coluna == 7 && peao.linha < 7)
+            novaLinha++;
+        else if (peao.linha == 7 && peao.coluna > 7)
+            novaColuna--;
+        else if (peao.coluna == 7 && peao.linha > 7)
+            novaLinha--;
+
+        // Atualizar a posição do peão
+        tabuleiro[peao.linha][peao.coluna] = '.';
+        peao.linha = novaLinha;
+        peao.coluna = novaColuna;
+        tabuleiro[peao.linha][peao.coluna] = cor;
+
+        // Verificar se o peão chegou ao centro
         if (peao.linha == CENTRO_TABULEIRO && peao.coluna == CENTRO_TABULEIRO)
         {
             return true;
         }
-        // Verificar a direção do movimento
-        if (peao.coluna == 6 && peao.linha > 0 && peao.linha < 6)
-        {
-            dy = -1;
-        }
-        else if (peao.coluna == 8 && peao.linha > 8 && peao.linha < TAMANHO_TABULEIRO)
-        {
-            dy = 1;
-        }
-        else if (peao.linha == 6 && peao.coluna > 0 && peao.coluna < 6)
-        {
-            dx = -1;
-        }
-        else if (peao.linha == 8 && peao.coluna > 8 && peao.coluna < TAMANHO_TABULEIRO)
-        {
-            dx = 1;
-        }
-        // Atualizar a posição do peão
-        peao.linha += dx;
-        peao.coluna += dy;
-        // Atualizar o tabuleiro
-        tabuleiro[peao.linha][peao.coluna] = cor;
+
         movimentos--;
     }
+
     return false;
 }
+
 vector<vector<char>> criarTabuleiro()
 {
     vector<vector<char>> tabuleiro(TAMANHO_TABULEIRO, vector<char>(TAMANHO_TABULEIRO, ' '));
@@ -831,6 +848,7 @@ vector<vector<char>> criarTabuleiro()
     return tabuleiro;
 }
 bool realizarJogada(vector<vector<char>> &tabuleiro, char cor)
+
 {
     // Lançar o dado
     int movimentos = lancarDado();
@@ -838,7 +856,40 @@ bool realizarJogada(vector<vector<char>> &tabuleiro, char cor)
     // Mover o peão
     return moverPeao(tabuleiro, cor, movimentos);
 }
+bool existePecaNoTabuleiro(const vector<vector<char>> &tabuleiro, char cor)
+{
+    for (const auto &linha : tabuleiro)
+    {
+        for (char celula : linha)
+        {
+            if (celula == cor)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
+void retirarPecaDaToca(vector<vector<char>> &tabuleiro, char cor)
+{
+    if (cor == 'R' && tabuleiro[2][2] == ' ')
+    {
+        tabuleiro[6][2] = 'R'; // Posição inicial do vermelho
+    }
+    else if (cor == 'B' && tabuleiro[2][10] == ' ')
+    {
+        tabuleiro[2][8] = 'B'; // Posição inicial do azul
+    }
+    else if (cor == 'Y' && tabuleiro[10][10] == ' ')
+    {
+        tabuleiro[8][12] = 'Y'; // Posição inicial do amarelo
+    }
+    else if (cor == 'G' && tabuleiro[10][2] == ' ')
+    {
+        tabuleiro[12][6] = 'G'; // Posição inicial do verde
+    }
+}
 void limparTela()
 {
     system("cls"); // Para sistemas Unix/Linux
@@ -968,31 +1019,83 @@ void Tela_Jogar_MostrarTempoNaTela()
     cout << endl
          << "TIMER DO JOGO: " << segundosDecorridos << endl;
 }
-
 void tela_Jogar(const vector<string> &nomesJogadores, const vector<string> &coresJogadores)
 {
-    system("cls"); // Limpa o console antes de exibir a tela de cadastro
-
     srand(time(0));
     vector<vector<char>> tabuleiro = criarTabuleiro();
-    vector<char> cores = {'R', 'B', 'Y', 'G'};
     bool jogoTerminado = false;
     int rodada = 0;
+    int numJogadores = nomesJogadores.size();
+    vector<char> cores;
+
+    // Mapear cores dos jogadores
+    for (const auto &cor : coresJogadores)
+    {
+        if (cor == "Vermelho")
+        {
+            cores.push_back('R');
+        }
+        else if (cor == "Verde")
+        {
+            cores.push_back('G');
+        }
+        else if (cor == "Azul")
+        {
+            cores.push_back('B');
+        }
+        else if (cor == "Amarelo")
+        {
+            cores.push_back('Y');
+        }
+    }
 
     while (!jogoTerminado)
     {
         // Limpar a tela e imprimir o tabuleiro
         limparTela();
         imprimirTabuleiroColorido(tabuleiro);
+
         // Jogar
-        char corAtual = cores[rodada % 4];
-        jogoTerminado = realizarJogada(tabuleiro, corAtual);
+        char corAtual = cores[rodada % numJogadores];
+        cout << "Vez do jogador " << corAtual << " (" << nomesJogadores[rodada % numJogadores] << ")" << endl;
+        cout << "Pressione qualquer tecla para rolar o dado..." << endl;
+        _getch(); // Esperar pelo pressionamento de uma tecla
+
+        int movimentos = lancarDado();
+        cout << "Jogador " << corAtual << " tirou " << movimentos << " no dado." << endl;
+
+        if (movimentos == 6 && existePecaNoTabuleiro(tabuleiro, corAtual))
+        {
+            char opcao;
+            cout << "Você tirou 6! Deseja retirar uma peça da toca ou mover uma peça no tabuleiro? (r/m): ";
+            cin >> opcao;
+
+            if (opcao == 'r' || opcao == 'R')
+            {
+                retirarPecaDaToca(tabuleiro, corAtual);
+            }
+            else
+            {
+                jogoTerminado = moverPeao(tabuleiro, corAtual, movimentos);
+            }
+        }
+        else
+        {
+            jogoTerminado = moverPeao(tabuleiro, corAtual, movimentos);
+        }
+
+        // Verificar se a jogada resultou em término de jogo
+        if (jogoTerminado)
+        {
+            cout << "Jogador " << corAtual << " venceu o jogo!" << endl;
+            break;
+        }
+
         // Aguardar um pouco antes de continuar
-        sleep(1);
+        sleep(1); // No Windows, use Sleep(1000) para esperar 1 segundo
+
         rodada++;
     }
-
-    cout << "Jogador " << cores[(rodada - 1) % 4] << " venceu o jogo!" << endl;
 }
 
 void tela_Ranking()
