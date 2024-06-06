@@ -558,7 +558,7 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
                 // Verificar se a cor escolhida está dentro do intervalo válido
                 if (corEscolhida < 1 || corEscolhida > coresDisponiveis.size())
                 {
-                    cout << "Opção invalida. Por favor, escolha uma cor valida.\n";
+                    cout << "Opcao invalida. Por favor, escolha uma cor valida.\n";
                 }
             } while (corEscolhida < 1 || corEscolhida > coresDisponiveis.size());
 
@@ -892,7 +892,7 @@ void retirarPecaDaToca(vector<vector<char>> &tabuleiro, char cor)
 }
 void limparTela()
 {
-    system("cls"); // Para sistemas Unix/Linux
+    system("cls");
 }
 
 void tela_Login()
@@ -1067,7 +1067,7 @@ void tela_Jogar(const vector<string> &nomesJogadores, const vector<string> &core
         if (movimentos == 6 && existePecaNoTabuleiro(tabuleiro, corAtual))
         {
             char opcao;
-            cout << "Você tirou 6! Deseja retirar uma peça da toca ou mover uma peça no tabuleiro? (r/m): ";
+            cout << "Voce tirou 6! Deseja retirar uma peca da toca ou mover uma peca no tabuleiro?" << endl << "Digite r (remover) ou m (mover)\nOpcao: ";
             cin >> opcao;
 
             if (opcao == 'r' || opcao == 'R')
@@ -1141,7 +1141,7 @@ void tela_HistoricoPartidas()
     if (arquivo_dadosPartida.is_open())
     {
         cout << "\033[1;31m==============\033[0m HISTORICO DA PARTIDA \033[1;31m==============\033[0m" << endl;
-        cout << "Número da Partida\tData e Hora\tJogadores e Cores\tRanking" << endl;
+        cout << "Numero da Partida\tData e Hora\tJogadores e Cores\tRanking" << endl;
 
         string linha;
         while (getline(arquivo_dadosPartida, linha))
@@ -1181,7 +1181,7 @@ void tela_HistoricoPartidas()
     }
 
     int opcao;
-    cout << "\033[1;31m[1] - Digite 1 para Voltar\nOpcao: \033[0m";
+    cout << "\033[1;31m[1] - Digite 1 para Voltar\nOpcao desejada: \033[0m";
     cin >> opcao;
 
     if (opcao == 1)
@@ -1204,6 +1204,9 @@ void tela_EditarPerfil()
     int opcao;
     cout << "1 - Editar o perfil" << endl;
     cout << "2 - Excluir Perfil" << endl;
+    cout << "3 - voltar" << endl;
+    cout << "opcao desejada: ";
+
     cin >> opcao;
 
     if (opcao == 1)
@@ -1222,6 +1225,10 @@ void tela_EditarPerfil()
     {
         tela_ExcluirPerfil();
     }
+    else if (opcao == 3)
+    {
+        tela_Menu();
+    }
     else
     {
         system("cls");
@@ -1238,6 +1245,7 @@ void tela_RecuperarSenha()
 
     cout << "1 - Recuperar senha" << endl;
     cout << "2 - Login" << endl;
+    cout << "opcao desejada: ";
     cin >> opcao;
 
     if (opcao == 1)
@@ -1351,6 +1359,15 @@ void tela_ExcluirPerfil()
 {
     system("cls");
 
+    int opcao;
+
+    cout << "\0331 - Excluir perfil \033" << endl;
+    cout << "\0332 - voltar\033" << endl;
+    cout << "\033Opcao: \033" << endl;
+    cin >> opcao;
+
+    if (opcao == 1)
+    {
     string nome, senha, respostaPergunta;
 
     cout << "Digite seu nome de usuario: ";
@@ -1363,14 +1380,15 @@ void tela_ExcluirPerfil()
 
     excluirPerfil(nome, senha, respostaPergunta);
 }
-// else if (opcao == 2)
-// {
-//     tela_Menu();
-// }
-// else
-// {
-//     system("cls");
-//     cout << "Opcao invalida. Tente novamente.";
-//     system("pause");
-//     tela_ExcluirPerfil();
-// }
+else if (opcao == 2)
+{
+    tela_EditarPerfil();
+}
+else
+{
+    system("cls");
+    cout << "Opcao invalida. Tente novamente.";
+    system("pause");
+    tela_ExcluirPerfil();
+}
+}
