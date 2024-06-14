@@ -460,13 +460,10 @@ int selecionarQuantidadeJogParaPartida()
     // Chamando o método selecionarJogadoresECoresParaPartida() com o número de jogadores selecionado
     selecionarJogadoresECoresParaPartida(num_jogadores);
 }
-
-void selecionarJogadoresECoresParaPartida(int num_jogadores)
-{
+void selecionarJogadoresECoresParaPartida(int num_jogadores) {
     limparTela();
 
-    if (num_jogadores < 2 || num_jogadores > 4)
-    {
+    if (num_jogadores < 2 || num_jogadores > 4) {
         cout << "Numero de jogadores invalido. Por favor, escolha entre 2 e 4 jogadores.\n";
         return;
     }
@@ -474,18 +471,14 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
     ifstream arquivo_jogadores("jogadores.txt", ios::in);
     vector<pair<string, string>> jogadores;
 
-    if (arquivo_jogadores.is_open())
-    {
+    if (arquivo_jogadores.is_open()) {
         string linha;
         string nome, senha;
 
-        while (getline(arquivo_jogadores, linha))
-        {
-            if (linha.find("Nome: ") != string::npos)
-            {
+        while (getline(arquivo_jogadores, linha)) {
+            if (linha.find("Nome: ") != string::npos) {
                 nome = trim(linha.substr(6));
-                if (getline(arquivo_jogadores, linha) && linha.find("Senha: ") != string::npos)
-                {
+                if (getline(arquivo_jogadores, linha) && linha.find("Senha: ") != string::npos) {
                     senha = trim(linha.substr(7));
                     jogadores.push_back(make_pair(nome, senha));
                 }
@@ -497,79 +490,73 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
         sort(jogadores.begin(), jogadores.end());
 
         cout << "Lista de Jogadores:\n";
-        for (int i = 0; i < jogadores.size(); ++i)
-        {
+        for (int i = 0; i < jogadores.size(); ++i) {
             cout << i + 1 << ". " << jogadores[i].first << "\n";
         }
 
-        vector<string> coresDisponiveis = {"Vermelho", "Verde", "Azul", "Amarelo"};
+        vector<pair<string, string>> coresDisponiveis = {
+            {"\033[31mVermelho\033[0m", "Vermelho"},
+            {"\033[32mVerde\033[0m", "Verde"},
+            {"\033[34mAzul\033[0m", "Azul"},
+            {"\033[33mAmarelo\033[0m", "Amarelo"}
+        };
 
         vector<string> jogadoresSelecionados;
         vector<string> coresSelecionadas;
 
-        for (int i = 0; i < num_jogadores; ++i)
-        {
+        for (int i = 0; i < num_jogadores; ++i) {
             string nomePesquisado;
             cout << "\nDigite o nome do jogador " << i + 1 << ": ";
             cin >> nomePesquisado;
 
-            auto it = find_if(jogadores.begin(), jogadores.end(), [&nomePesquisado](const pair<string, string> &jogador)
-                              { return jogador.first == nomePesquisado; });
+            auto it = find_if(jogadores.begin(), jogadores.end(), [&nomePesquisado](const pair<string, string> &jogador) {
+                return jogador.first == nomePesquisado;
+            });
 
-            if (it != jogadores.end())
-            {
+            if (it != jogadores.end()) {
                 string senha;
                 cout << "Digite a senha do jogador " << nomePesquisado << ": ";
                 cin >> senha;
 
-                if (senha == it->second)
-                {
+                if (senha == it->second) {
                     cout << "Jogador " << it->first << " adicionado." << endl;
                     jogadoresSelecionados.push_back(it->first);
                     jogadores.erase(it);
-                }
-                else
-                {
+                } else {
                     cout << "Senha incorreta.\n";
                     --i; // Repetir a iteração para permitir que o usuário insira o nome e a senha novamente
                 }
-            }
-            else
-            {
+            } else {
                 cout << "Jogador nao encontrado.\n";
                 --i; // Repetir a iteração para permitir que o usuário insira o nome novamente
             }
         }
 
         cout << "\nAssocie as cores aos jogadores:\n";
-        for (int i = 0; i < jogadoresSelecionados.size(); ++i)
-        {
+        for (int i = 0; i < jogadoresSelecionados.size(); ++i) {
             limparTela();
 
             cout << "Escolha a cor para o jogador " << jogadoresSelecionados[i] << ":\n";
 
             // Mostrar cores disponíveis
             cout << "Cores disponiveis:\n";
-            for (int j = 0; j < coresDisponiveis.size(); ++j)
-            {
-                cout << j + 1 << ". " << coresDisponiveis[j] << "\n";
+            for (int j = 0; j < coresDisponiveis.size(); ++j) {
+                cout << j + 1 << ". " << coresDisponiveis[j].first << "\n";
             }
 
             int corEscolhida;
-            do
-            {
+            do {
                 cout << "Selecione o numero da sua cor: ";
                 cin >> corEscolhida;
 
                 // Verificar se a cor escolhida está dentro do intervalo válido
-                if (corEscolhida < 1 || corEscolhida > coresDisponiveis.size())
-                {
+                if (corEscolhida < 1 || corEscolhida > coresDisponiveis.size()) {
                     cout << "Opcao invalida. Por favor, escolha uma cor valida.\n";
                 }
             } while (corEscolhida < 1 || corEscolhida > coresDisponiveis.size());
 
             // Adicionar a cor selecionada à lista de cores selecionadas
-            coresSelecionadas.push_back(coresDisponiveis[corEscolhida - 1]);
+            coresSelecionadas.push_back(coresDisponiveis[corEscolhida - 1].second);
 
             // Remover a cor escolhida das cores disponíveis
             coresDisponiveis.erase(coresDisponiveis.begin() + corEscolhida - 1);
@@ -577,14 +564,11 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores)
 
         // Chamando tela_Jogar() passando os vetores preenchidos
         tela_Jogar(jogadoresSelecionados, coresSelecionadas);
-    }
-    else
-    {
+    } else {
         cout << "Erro ao abrir o arquivo de jogadores.\n";
         return;
     }
 }
-
 void imprimirTabuleiroColorido(const vector<vector<char>> &tabuleiro)
 {
     // percursos
@@ -1122,7 +1106,7 @@ void tela_Jogar(const vector<string> &nomesJogadores, const vector<string> &core
                 retirarPecaDaToca(tabuleiro, corAtual);
             } else {
                 char opcao;
-                cout << "Você tirou 6! Deseja retirar uma peça da toca ou mover uma peça no tabuleiro?" << endl << "Digite r (retirar) ou m (mover)\nOpcao: ";
+                cout << "M (Mover peca) - R (Retirar peca da Casa)" << endl << "Opcao: ";
                 cin >> opcao;
 
                 if (opcao == 'r' || opcao == 'R') {
