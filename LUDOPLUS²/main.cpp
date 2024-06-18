@@ -853,7 +853,7 @@ void capturarPeoesAdversarios(vector<vector<char>> &tabuleiro, int linha, int co
     if (tabuleiro[linha][coluna] == corAdversario) {
         tabuleiro[linha][coluna] = '.';  // Limpa a posição atual do peão adversário
         tabuleiro[toca.first][toca.second] = corAdversario;  // Move o peão adversário para a toca
-        cout << "Peão " << corAdversario << " enviado de volta para a toca em (" << toca.first << ", " << toca.second << ")." << endl;
+        cout << "Peao " << corAdversario << " enviado de volta para a toca em (" << toca.first << ", " << toca.second << ")." << endl;
     }
 }
 
