@@ -42,6 +42,7 @@ void fecharJogo();
 void validarLogin(string nome, string senha);
 bool verificarNomeExistente(const string &nome);
 bool verificarTamanhoSenha(const string &senha);
+void tabelaDoRanking();
 bool verificarSenhasIguais(const string &senha, const string &confirmarSenha);
 bool verificarRespostasIguais(const string &resposta, const string &confirmarResposta);
 void excluirPerfil(const string &nome, const string &senha, const string &respostaPergunta);
@@ -343,6 +344,13 @@ bool verificarNomeExistente(const string &nome)
     }
     return false;
 }
+
+void tabelaDoRanking(){
+
+ifstream arquivo_jogadores("jogadores.txt",ios:: in);
+
+}
+
 
 bool verificarTamanhoSenha(const string &senha)
 {
