@@ -33,6 +33,35 @@ struct Celula {
     Celula(int l = -1, int c = -1) : linha(l), coluna(c) {}
 };
 
+Celula calcularNovaPosicao(Celula posicaoAtual, int movimentos) {
+    while (movimentos > 0) {
+        if (posicaoAtual.linha == 6 && posicaoAtual.coluna < 6)
+            posicaoAtual.coluna++;
+        else if (posicaoAtual.coluna == 6 && posicaoAtual.linha > 0)
+            posicaoAtual.linha--;
+        else if (posicaoAtual.linha == 0 && posicaoAtual.coluna < 14)
+            posicaoAtual.coluna++;
+        else if (posicaoAtual.coluna == 14 && posicaoAtual.linha < 14)
+            posicaoAtual.linha++;
+        else if (posicaoAtual.linha == 14 && posicaoAtual.coluna > 0)
+            posicaoAtual.coluna--;
+        else if (posicaoAtual.coluna == 0 && posicaoAtual.linha > 6)
+            posicaoAtual.linha--;
+        else if (posicaoAtual.linha == 7 && posicaoAtual.coluna < 7)
+            posicaoAtual.coluna++;
+        else if (posicaoAtual.coluna == 7 && posicaoAtual.linha < 7)
+            posicaoAtual.linha++;
+        else if (posicaoAtual.linha == 7 && posicaoAtual.coluna > 7)
+            posicaoAtual.coluna--;
+        else if (posicaoAtual.coluna == 7 && posicaoAtual.linha > 7)
+            posicaoAtual.linha--;
+
+        movimentos--;
+    }
+
+    return posicaoAtual;
+}
+
 // Declaração das funções
 void salvarJogador_txt(string nome, string senha);
 void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<string, string>> jogadoresCores, vector<pair<string, pair<string, int>>> ranking);
@@ -56,6 +85,7 @@ bool moverPeao(vector<vector<char>> &tabuleiro, char cor, int movimentos);
 vector<vector<char>> criarTabuleiro();
 bool realizarJogada(vector<vector<char>> &tabuleiro, char cor);
 bool existePecaNoTabuleiro(const vector<vector<char>> &tabuleiro, char cor);
+bool verificarPosicao(vector<vector<char>> &tabuleiro, int linha, int coluna, char cor);
 void retirarPecaDaToca(vector<vector<char>> &tabuleiro, char cor);
 void capturarPeoesAdversarios(vector<vector<char>> &tabuleiro, int linha, int coluna, char corAdversario);
 
@@ -74,7 +104,8 @@ void tela_Regras();
 void tela_ExcluirPerfil();
 
 int main() {
-    tela_Login();
+    //tela_Login();
+    selecionarQuantidadeJogParaPartida();
     return 0;
 }
 
@@ -147,11 +178,11 @@ void solicitarDadosJogador(string &nome, string &senha, string &perguntaSeguranc
     string confirmarSenha;
     do
     {
-        cout << "\033[1;32mInforme a sua senha (mínimo de 6 caracteres):\033[0m " << endl;
+        cout << "\033[1;32mInforme a sua senha (minimo de 6 caracteres):\033[0m " << endl;
         cin >> senha;
         if (!verificarTamanhoSenha(senha))
         {
-            cout << "\033[1;31mA senha deve ter no mínimo 6 caracteres.\033[0m" << endl;
+            cout << "\033[1;31mA senha deve ter no minimo 6 caracteres.\033[0m" << endl;
         }
         else
         {
@@ -159,12 +190,12 @@ void solicitarDadosJogador(string &nome, string &senha, string &perguntaSeguranc
             cin >> confirmarSenha;
             if (!verificarSenhasIguais(senha, confirmarSenha))
             {
-                cout << "\033[1;31mAs senhas não coincidem.\033[0m" << endl;
+                cout << "\033[1;31mAs senhas nao coincidem.\033[0m" << endl;
             }
         }
     } while (!verificarTamanhoSenha(senha) || !verificarSenhasIguais(senha, confirmarSenha));
 
-    cout << "\033[1;32mDigite uma pergunta que apenas você saiba responder:\033[0m" << endl;
+    cout << "\033[1;32mDigite uma pergunta que apenas voce saiba responder:\033[0m" << endl;
     cin.ignore();                    // Ignora o restante da linha anterior
     getline(cin, perguntaSeguranca); // Permite espaços na pergunta
     cout << "\033[1;32mInforme a resposta da pergunta:\033[0m" << endl;
@@ -176,7 +207,7 @@ void solicitarDadosJogador(string &nome, string &senha, string &perguntaSeguranc
 
     while (!verificarRespostasIguais(respostaPergunta, confirmarRespostaSenha))
     {
-        cout << "\033[1;31mAs respostas da pergunta de segurança não coincidem.\033[0m" << endl;
+        cout << "\033[1;31mAs respostas da pergunta de segurança nao coincidem.\033[0m" << endl;
         cout << "\033[1;32mInforme a resposta da pergunta:\033[0m" << endl;
         getline(cin, respostaPergunta); // Permite espaços na resposta
         cout << "\033[1;32mConfirme a resposta da pergunta:\033[0m" << endl;
@@ -338,7 +369,7 @@ bool verificarNomeExistente(const string &nome)
     {
         if (linha.find("Nome: " + nome) != string::npos)
         {
-            cout << "Este nome já existe. Por favor, escolha outro nome." << endl;
+            cout << "Este nome ja existe. Por favor, escolha outro nome." << endl;
             return true;
         }
     }
@@ -350,7 +381,6 @@ void tabelaDoRanking(){
 ifstream arquivo_jogadores("jogadores.txt",ios:: in);
 
 }
-
 
 bool verificarTamanhoSenha(const string &senha)
 {
@@ -468,6 +498,7 @@ int selecionarQuantidadeJogParaPartida()
     // Chamando o método selecionarJogadoresECoresParaPartida() com o número de jogadores selecionado
     selecionarJogadoresECoresParaPartida(num_jogadores);
 }
+
 void selecionarJogadoresECoresParaPartida(int num_jogadores) {
     limparTela();
 
@@ -577,8 +608,8 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores) {
         return;
     }
 }
-void imprimirTabuleiroColorido(const vector<vector<char>> &tabuleiro)
-{
+
+void imprimirTabuleiroColorido(const vector<vector<char>> &tabuleiro){
     // percursos
     unordered_map<char, string> cores_min = {
         {'r', "\033[1;31m"},      // Vermelho
@@ -595,6 +626,27 @@ void imprimirTabuleiroColorido(const vector<vector<char>> &tabuleiro)
         {'Y', "\033[1;33m"}, // Amarelo
         {'G', "\033[1;32m"}, // Verde
     };
+    
+    // Adicionando correspondência de cores para as letras A, B, C, D nas tocas
+    unordered_map<char, string> cores_peoes_toca = {
+        {'A', "\033[1;31m"}, // Vermelho
+        {'B', "\033[1;31m"}, // Vermelho
+        {'C', "\033[1;31m"}, // Vermelho
+        {'D', "\033[1;31m"}, // Vermelho
+        {'E', "\033[1;34m"}, // Azul
+        {'F', "\033[1;34m"}, // Azul
+        {'G', "\033[1;34m"}, // Azul
+        {'H', "\033[1;34m"}, // Azul
+        {'I', "\033[1;33m"}, // Amarelo
+        {'J', "\033[1;33m"}, // Amarelo
+        {'K', "\033[1;33m"}, // Amarelo
+        {'L', "\033[1;33m"}, // Amarelo
+        {'M', "\033[1;32m"}, // Verde
+        {'N', "\033[1;32m"}, // Verde
+        {'O', "\033[1;32m"}, // Verde
+        {'P', "\033[1;32m"}  // Verde
+    };
+
     // tabuleiro
     for (const auto &linha : tabuleiro)
     {
@@ -607,6 +659,10 @@ void imprimirTabuleiroColorido(const vector<vector<char>> &tabuleiro)
             else if (cores_mai.find(celula) != cores_mai.end())
             {
                 cout << cores_mai[celula] << celula << "\033[0m ";
+            }
+            else if (cores_peoes_toca.find(celula) != cores_peoes_toca.end())
+            {
+                cout << cores_peoes_toca[celula] << celula << "\033[0m ";
             }
             else
             {
@@ -623,6 +679,7 @@ string trim(const string &str)
     size_t last = str.find_last_not_of(' ');
     return str.substr(first, (last - first + 1));
 }
+
 int lancarDado()
 {                          // Função para rolar o dado
     return rand() % 6 + 1; // Gera um número aleatório de 1 a 6
@@ -631,7 +688,7 @@ int lancarDado()
 bool moverPeao(vector<vector<char>> &tabuleiro, char cor, int movimentos) {
     Celula peao;
     bool encontrado = false;
-    
+
     // Encontrar a posição atual do peão
     for (int i = 0; i < TAMANHO_TABULEIRO; ++i) {
         for (int j = 0; j < TAMANHO_TABULEIRO; ++j) {
@@ -646,58 +703,31 @@ bool moverPeao(vector<vector<char>> &tabuleiro, char cor, int movimentos) {
     }
 
     if (!encontrado) {
-        cout << "Peão da cor " << cor << " não encontrado no tabuleiro." << endl;
+        cout << "Peao da cor " << cor << " nao encontrado no tabuleiro." << endl;
         return false;
     }
 
-    // Mover o peão
-    while (movimentos > 0) {
-        int novaLinha = peao.linha, novaColuna = peao.coluna;
+    cout << "Peao da cor " << cor << " encontrado na posição (" << peao.linha << ", " << peao.coluna << ")." << endl;
 
-        // Determinar a direção do movimento
-        if (peao.linha == 6 && peao.coluna < 6)
-            novaColuna++;
-        else if (peao.coluna == 6 && peao.linha > 0)
-            novaLinha--;
-        else if (peao.linha == 0 && peao.coluna < 14)
-            novaColuna++;
-        else if (peao.coluna == 14 && peao.linha < 14)
-            novaLinha++;
-        else if (peao.linha == 14 && peao.coluna > 0)
-            novaColuna--;
-        else if (peao.coluna == 0 && peao.linha > 6)
-            novaLinha--;
-        else if (peao.linha == 7 && peao.coluna < 7)
-            novaColuna++;
-        else if (peao.coluna == 7 && peao.linha < 7)
-            novaLinha++;
-        else if (peao.linha == 7 && peao.coluna > 7)
-            novaColuna--;
-        else if (peao.coluna == 7 && peao.linha > 7)
-            novaLinha--;
+    // Calcular a nova posição do peão
+    Celula novaPosicao = calcularNovaPosicao(peao, movimentos);
 
-        // Atualizar a posição do peão
-        tabuleiro[peao.linha][peao.coluna] = '.';
-        peao.linha = novaLinha;
-        peao.coluna = novaColuna;
+    cout << "Movendo para posição (" << novaPosicao.linha << ", " << novaPosicao.coluna << ")." << endl;
 
-        // Verifica se o peão caiu na casa da coroa ou vingança
-        char celulaDestino = tabuleiro[novaLinha][novaColuna];
-        if (celulaDestino == ':') { // Casa da coroa
-            cout << "Casa da coroa! Jogue novamente o dado." << endl;
-            return true; // Indica que o jogador pode jogar novamente
-        } else if (celulaDestino == ';') { // Casa da vingança
-            cout << "Casa da vingança! Escolha um peão adversário para enviar à toca." << endl;
-            // Aqui você deve implementar a lógica para o jogador escolher um peão adversário
-        }
-
-        tabuleiro[peao.linha][peao.coluna] = cor;
-        movimentos--;
+    // Verificar se a nova posição é válida
+    if (!verificarPosicao(tabuleiro, novaPosicao.linha, novaPosicao.coluna, cor)) {
+        cout << "Movimento invalido. Posicao ja ocupada por uma peca da mesma cor." << endl;
+        return false;
     }
+
+    // Atualizar a posição do peão
+    tabuleiro[peao.linha][peao.coluna] = '.';
+    tabuleiro[novaPosicao.linha][novaPosicao.coluna] = cor;
+
+    cout << "Peao da cor " << cor << " movido para posição (" << novaPosicao.linha << ", " << novaPosicao.coluna << ")." << endl;
 
     return false;
 }
-
 
 vector<vector<char>> criarTabuleiro()
 {
@@ -825,35 +855,59 @@ vector<vector<char>> criarTabuleiro()
     // casa final
     tabuleiro[CENTRO_TABULEIRO][CENTRO_TABULEIRO] = 'F';
     // peões base vermelha
-    tabuleiro[2][2] = 'R'; // Linha 2, Coluna 2
-    tabuleiro[2][4] = 'R'; // Linha 2, Coluna 4
-    tabuleiro[4][2] = 'R'; // Linha 4, Coluna 2
-    tabuleiro[4][4] = 'R'; // Linha 4, Coluna 4
+    tabuleiro[2][2] = 'A'; // Linha 2, Coluna 2
+    tabuleiro[2][4] = 'B'; // Linha 2, Coluna 4
+    tabuleiro[4][2] = 'C'; // Linha 4, Coluna 2
+    tabuleiro[4][4] = 'D'; // Linha 4, Coluna 4
     // peões base azul
-    tabuleiro[2][10] = 'B'; // Linha 2, Coluna 10
+    tabuleiro[2][10] = 'A'; // Linha 2, Coluna 10
     tabuleiro[2][12] = 'B'; // Linha 2, Coluna 12
-    tabuleiro[4][10] = 'B'; // Linha 4, Coluna 10
-    tabuleiro[4][12] = 'B'; // Linha 4, Coluna 12
+    tabuleiro[4][10] = 'C'; // Linha 4, Coluna 10
+    tabuleiro[4][12] = 'D'; // Linha 4, Coluna 12
     // peões base verde
-    tabuleiro[10][2] = 'G'; // Linha 10, Coluna 2
-    tabuleiro[10][4] = 'G'; // Linha 10, Coluna 4
-    tabuleiro[12][2] = 'G'; // Linha 12, Coluna 2
-    tabuleiro[12][4] = 'G'; // Linha 12, Coluna 4
+    tabuleiro[10][2] = 'A'; // Linha 10, Coluna 2
+    tabuleiro[10][4] = 'B'; // Linha 10, Coluna 4
+    tabuleiro[12][2] = 'C'; // Linha 12, Coluna 2
+    tabuleiro[12][4] = 'D'; // Linha 12, Coluna 4
     // peões base amarela
-    tabuleiro[10][10] = 'Y'; // Linha 10, Coluna 10
-    tabuleiro[10][12] = 'Y'; // Linha 10, Coluna 12
-    tabuleiro[12][10] = 'Y'; // Linha 12, Coluna 10
-    tabuleiro[12][12] = 'Y'; // Linha 12, Coluna 12
+    tabuleiro[10][10] = 'A'; // Linha 10, Coluna 10
+    tabuleiro[10][12] = 'B'; // Linha 10, Coluna 12
+    tabuleiro[12][10] = 'C'; // Linha 12, Coluna 10
+    tabuleiro[12][12] = 'D'; // Linha 12, Coluna 12
     return tabuleiro;
 }
-bool realizarJogada(vector<vector<char>> &tabuleiro, char cor)
 
-{
+bool realizarJogada(vector<vector<char>> &tabuleiro, char cor) {
     // Lançar o dado
     int movimentos = lancarDado();
     cout << "Jogador " << cor << " tirou " << movimentos << " no dado." << endl;
-    // Mover o peão
-    return moverPeao(tabuleiro, cor, movimentos);
+
+    if (movimentos == 6) {
+        if (!existePecaNoTabuleiro(tabuleiro, cor)) {
+            cout << "Voce tirou 6, mas nao tem pecas no tabuleiro. Pressione Enter para retirar uma peca da toca." << endl;
+            cin.ignore();
+            cin.get();
+            retirarPecaDaToca(tabuleiro, cor);
+        } else {
+            char opcao;
+            cout << "Digite M (Mover peca) - R (Retirar peca da Casa)" << endl << "Opcao: ";
+            cin >> opcao;
+
+            if (opcao == 'r' || opcao == 'R') {
+                retirarPecaDaToca(tabuleiro, cor);
+            } else {
+                if (moverPeao(tabuleiro, cor, movimentos)) {
+                    return true; // Indica que o jogador pode jogar novamente
+                }
+            }
+        }
+    } else {
+        if (moverPeao(tabuleiro, cor, movimentos)) {
+            return true; // Indica que o jogador pode jogar novamente
+        }
+    }
+
+    return false;
 }
 
 void capturarPeoesAdversarios(vector<vector<char>> &tabuleiro, int linha, int coluna, char corAdversario) {
@@ -880,65 +934,81 @@ bool existePecaNoTabuleiro(const vector<vector<char>> &tabuleiro, char cor)
     return false;
 }
 
+bool verificarPosicao(vector<vector<char>> &tabuleiro, int linha, int coluna, char cor) {
+    char celula = tabuleiro[linha][coluna];
+    if (celula == ' ' || celula == '.') {
+        // Posição vazia ou célula do caminho, pode mover
+        return true;
+    } else if (celula == cor) {
+        // Posição já ocupada por uma peça da mesma cor, não pode mover
+        return false;
+    } else {
+        // Posição ocupada por uma peça adversária, capturar
+        capturarPeoesAdversarios(tabuleiro, linha, coluna, celula);
+        return true;
+    }
+}
+
 void retirarPecaDaToca(vector<vector<char>> &tabuleiro, char cor) {
     if (cor == 'R') {
         // Encontra uma peça vermelha na base (toca) e a remove
-        if (tabuleiro[2][2] == 'R') {
+        if (tabuleiro[2][2] == 'A') {
             tabuleiro[2][2] = ' ';
-            tabuleiro[6][2] = 'R'; // Posição inicial do vermelho
-        } else if (tabuleiro[2][4] == 'R') {
+            tabuleiro[6][2] = 'A'; // Posição inicial do vermelho
+        } else if (tabuleiro[2][4] == 'B') {
             tabuleiro[2][4] = ' ';
-            tabuleiro[6][2] = 'R'; // Posição inicial do vermelho
-        } else if (tabuleiro[4][2] == 'R') {
+            tabuleiro[6][2] = 'B'; // Posição inicial do vermelho
+        } else if (tabuleiro[4][2] == 'C') {
             tabuleiro[4][2] = ' ';
-            tabuleiro[6][2] = 'R'; // Posição inicial do vermelho
-        } else if (tabuleiro[4][4] == 'R') {
+            tabuleiro[6][2] = 'C'; // Posição inicial do vermelho
+        } else if (tabuleiro[4][4] == 'D') {
             tabuleiro[4][4] = ' ';
-            tabuleiro[6][2] = 'R'; // Posição inicial do vermelho
+            tabuleiro[6][2] = 'D'; // Posição inicial do vermelho
         }
     } else if (cor == 'B') {
-        if (tabuleiro[2][10] == 'B') {
+        if (tabuleiro[2][10] == 'A') {
             tabuleiro[2][10] = ' ';
-            tabuleiro[2][8] = 'B'; // Posição inicial do azul
+            tabuleiro[2][8] = 'A'; // Posição inicial do azul
         } else if (tabuleiro[2][12] == 'B') {
             tabuleiro[2][12] = ' ';
             tabuleiro[2][8] = 'B'; // Posição inicial do azul
-        } else if (tabuleiro[4][10] == 'B') {
+        } else if (tabuleiro[4][10] == 'C') {
             tabuleiro[4][10] = ' ';
-            tabuleiro[2][8] = 'B'; // Posição inicial do azul
-        } else if (tabuleiro[4][12] == 'B') {
+            tabuleiro[2][8] = 'C'; // Posição inicial do azul
+        } else if (tabuleiro[4][12] == 'D') {
             tabuleiro[4][12] = ' ';
-            tabuleiro[2][8] = 'B'; // Posição inicial do azul
+            tabuleiro[2][8] = 'D'; // Posição inicial do azul
         }
     } else if (cor == 'Y') {
-        if (tabuleiro[10][10] == 'Y') {
+        if (tabuleiro[10][10] == 'A') {
             tabuleiro[10][10] = ' ';
-            tabuleiro[8][12] = 'Y'; // Posição inicial do amarelo
-        } else if (tabuleiro[10][12] == 'Y') {
+            tabuleiro[8][12] = 'A'; // Posição inicial do amarelo
+        } else if (tabuleiro[10][12] == 'B') {
             tabuleiro[10][12] = ' ';
-            tabuleiro[8][12] = 'Y'; // Posição inicial do amarelo
-        } else if (tabuleiro[12][10] == 'Y') {
+            tabuleiro[8][12] = 'B'; // Posição inicial do amarelo
+        } else if (tabuleiro[12][10] == 'C') {
             tabuleiro[12][10] = ' ';
-            tabuleiro[8][12] = 'Y'; // Posição inicial do amarelo
-        } else if (tabuleiro[12][12] == 'Y') {
+            tabuleiro[8][12] = 'C'; // Posição inicial do amarelo
+        } else if (tabuleiro[12][12] == 'D') {
             tabuleiro[12][12] = ' ';
-            tabuleiro[8][12] = 'Y'; // Posição inicial do amarelo
+            tabuleiro[8][12] = 'D'; // Posição inicial do amarelo
         }
     } else if (cor == 'G') {
-        if (tabuleiro[10][2] == 'G') {
+        if (tabuleiro[10][2] == 'A') {
             tabuleiro[10][2] = ' ';
-            tabuleiro[12][6] = 'G'; // Posição inicial do verde
-        } else if (tabuleiro[10][4] == 'G') {
+            tabuleiro[12][6] = 'A'; // Posição inicial do verde
+        } else if (tabuleiro[10][4] == 'B') {
             tabuleiro[10][4] = ' ';
-            tabuleiro[12][6] = 'G'; // Posição inicial do verde
-        } else if (tabuleiro[12][2] == 'G') {
+            tabuleiro[12][6] = 'B'; // Posição inicial do verde
+        } else if (tabuleiro[12][2] == 'C') {
             tabuleiro[12][2] = ' ';
-            tabuleiro[12][6] = 'G'; // Posição inicial do verde
-        } else if (tabuleiro[12][4] == 'G') {
+            tabuleiro[12][6] = 'C'; // Posição inicial do verde
+        } else if (tabuleiro[12][4] == 'D') {
             tabuleiro[12][4] = ' ';
-            tabuleiro[12][6] = 'G'; // Posição inicial do verde
+            tabuleiro[12][6] = 'D'; // Posição inicial do verde
         }
     }
+    
 }
 
 void limparTela()
