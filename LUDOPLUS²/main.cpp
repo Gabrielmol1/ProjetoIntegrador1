@@ -71,7 +71,8 @@ void fecharJogo();
 void validarLogin(string nome, string senha);
 bool verificarNomeExistente(const string &nome);
 bool verificarTamanhoSenha(const string &senha);
-void tabelaDoRanking();
+void tabelaRankingPontos();
+void tabelaRankingVitorias();
 bool verificarSenhasIguais(const string &senha, const string &confirmarSenha);
 bool verificarRespostasIguais(const string &resposta, const string &confirmarResposta);
 void excluirPerfil(const string &nome, const string &senha, const string &respostaPergunta);
@@ -376,9 +377,12 @@ bool verificarNomeExistente(const string &nome)
     return false;
 }
 
-void tabelaDoRanking(){
+void tabelaRankingPontos(){
 
-ifstream arquivo_jogadores("jogadores.txt",ios:: in);
+}
+
+void tabelaRankingVitorias(){
+
 
 }
 
@@ -633,18 +637,18 @@ void imprimirTabuleiroColorido(const vector<vector<char>> &tabuleiro){
         {'B', "\033[1;31m"}, // Vermelho
         {'C', "\033[1;31m"}, // Vermelho
         {'D', "\033[1;31m"}, // Vermelho
-        {'E', "\033[1;34m"}, // Azul
-        {'F', "\033[1;34m"}, // Azul
-        {'G', "\033[1;34m"}, // Azul
-        {'H', "\033[1;34m"}, // Azul
-        {'I', "\033[1;33m"}, // Amarelo
-        {'J', "\033[1;33m"}, // Amarelo
-        {'K', "\033[1;33m"}, // Amarelo
-        {'L', "\033[1;33m"}, // Amarelo
-        {'M', "\033[1;32m"}, // Verde
-        {'N', "\033[1;32m"}, // Verde
-        {'O', "\033[1;32m"}, // Verde
-        {'P', "\033[1;32m"}  // Verde
+        {'A', "\033[1;34m"}, // Azul
+        {'B', "\033[1;34m"}, // Azul
+        {'C', "\033[1;34m"}, // Azul
+        {'D', "\033[1;34m"}, // Azul
+        {'A', "\033[1;33m"}, // Amarelo
+        {'B', "\033[1;33m"}, // Amarelo
+        {'C', "\033[1;33m"}, // Amarelo
+        {'D', "\033[1;33m"}, // Amarelo
+        {'A', "\033[1;32m"}, // Verde
+        {'B', "\033[1;32m"}, // Verde
+        {'C', "\033[1;32m"}, // Verde
+        {'D', "\033[1;32m"}  // Verde
     };
 
     // tabuleiro
@@ -1214,31 +1218,28 @@ void tela_Ranking()
 {
     system("cls"); // Limpa o console antes de exibir a tela de ranking
 
-    cout << "\033[1;31m==============\033[0m RANKING \033[1;31m==============\033[0m" << endl;
-    cout << " AINDA NAO FOI FEITO MANE " << endl;
-
-    //  ifstream arquivo_estatisticas("estatisticas.txt");
-    //  if (arquivo_estatisticas.is_open()) {
-    //      string linha;
-    //      while (getline(arquivo_estatisticas, linha)) {
-    //          cout << linha << endl;
-    //      }
-    //      arquivo_estatisticas.close();
-    //  } else {
-    //       cout << "Erro ao abrir o arquivo de ranking." << endl;
-    //  }
-
     int opcao;
-    cout << "\033[1;31m[1] - Digite 1 para Voltar\nOpcao: \033[0m";
+    cout << "\033[1;31m[1] - Digite 1 para ver o ranking de Pontos\nOpcao: \033[0m";
+    cout << "\033[1;31m[1] - Digite 2 para ver o ranking de Vitorias\nOpcao: \033[0m";
+    cout << "\033[1;31m[1] - Digite 3 para Voltar\nOpcao: \033[0m";
+
     cin >> opcao;
 
     if (opcao == 1)
     {
+        tabelaRankingPontos();
+    }
+    else if (opcao == 2)
+    {
+        tabelaRankingVitorias();
+    }
+    else if (opcao == 3)
+    {
         tela_Menu();
     }
-    else
+    else 
     {
-        system("cls");
+        limparTela();
         cout << "opcao invalida";
         system("pause");
         tela_Ranking();
@@ -1469,7 +1470,7 @@ void tela_Regras()
 
 void tela_ExcluirPerfil()
 {
-    system("cls");
+    limparTela();
 
     int opcao;
 
@@ -1498,7 +1499,7 @@ else if (opcao == 2)
 }
 else
 {
-    system("cls");
+    limparTela();
     cout << "Opcao invalida. Tente novamente.";
     system("pause");
     tela_ExcluirPerfil();
