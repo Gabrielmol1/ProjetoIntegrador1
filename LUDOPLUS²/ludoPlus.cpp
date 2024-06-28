@@ -35,6 +35,7 @@ struct Celula {
     Celula(int l = -1, int c = -1) : linha(l), coluna(c) {}
 };
 
+
 Celula calcularNovaPosicao(Celula posicaoAtual, int movimentos) {
     while (movimentos > 0) {
         if (posicaoAtual.linha == 6 && posicaoAtual.coluna < 6)
