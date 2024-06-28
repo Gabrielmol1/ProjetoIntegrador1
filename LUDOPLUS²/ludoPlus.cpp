@@ -12,6 +12,8 @@
 
 using namespace std;
 
+//teste comit
+
 time_t tempoInicial;
 
 const int TAMANHO_TABULEIRO = 15;
