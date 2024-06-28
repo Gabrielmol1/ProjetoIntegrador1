@@ -65,6 +65,9 @@ Celula calcularNovaPosicao(Celula posicaoAtual, int movimentos) {
 // Declaração das funções
 void salvarJogador_txt(string nome, string senha);
 void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<string, string>> jogadoresCores, vector<pair<string, pair<string, int>>> ranking);
+void lerCsvDadosPartida();
+void salvarRankingPontuacao();
+void salvarRankingVitorias();
 void solicitarDadosJogador(string &nome, string &senha, string &perguntaSeguranca, string &respostaPergunta);
 void salvarEditarPerfil(string nomeAtual, string senhaAtual);
 void fecharJogo();
@@ -72,7 +75,13 @@ void validarLogin(string nome, string senha);
 bool verificarNomeExistente(const string &nome);
 bool verificarTamanhoSenha(const string &senha);
 void tabelaRankingPontos();
-void tabelaRankingVitorias();
+void atualizarTabelaPontos();
+void somarPontosDosJogadores();
+void tabelaRankingVitoriasGeral();
+void TabelaRankingVitorias4Jogadores();
+void TabelaRankingVitorias3Jogadores();
+void TabelaRankingVitorias2Jogadores();
+void atualizarTabelaVitorias();
 bool verificarSenhasIguais(const string &senha, const string &confirmarSenha);
 bool verificarRespostasIguais(const string &resposta, const string &confirmarResposta);
 void excluirPerfil(const string &nome, const string &senha, const string &respostaPergunta);
@@ -162,6 +171,50 @@ void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<stri
         cout << "Erro ao abrir o arquivo para salvar os dados da partida." << endl;
         system("pause");
         tela_Menu();
+    }
+}
+
+void lerCsvDadosPartida(){
+
+    ifstream arquivo_jogadores("DadosPartida.csv", ios::in);
+
+    //passar os jogadores e suas pontuaçoes somarPontosDosJogadores();
+
+    somarPontosDosJogadores();
+
+    // passar os dados das partidas para 
+
+}
+
+void salvarRankingPontuacao(){
+
+     ofstream arquivo_jogadores("rankingPontuacao.csv", ios::app);
+    if (arquivo_jogadores.is_open())
+    {
+        //colocar aqui a logica para salvar os jogadores e suas pontuaçoes
+    }
+    else
+    {
+        limparTela();
+        cout << "Erro ao abrir o arquivo de jogadores." << endl;
+        system("pause");
+        tela_Login();
+    }
+}
+
+void salvarRankingVitorias(){
+
+     ofstream arquivo_jogadores("rankingVitoriasPartidas.csv", ios::app);
+    if (arquivo_jogadores.is_open())
+    {
+        //colocar aqui a logica para salvar os jogadores e suas pontuaçoes
+    }
+    else
+    {
+        limparTela();
+        cout << "Erro ao abrir o arquivo de jogadores." << endl;
+        system("pause");
+        tela_Login();
     }
 }
 
@@ -379,10 +432,45 @@ bool verificarNomeExistente(const string &nome)
 
 void tabelaRankingPontos(){
 
+    atualizarTabelaPontos();
+
+    ifstream arquivo_jogadores("rankingPontuacao.csv", ios::in);
+
+    //implementar a logica para exibir o ranking dos jogadores
+
 }
 
-void tabelaRankingVitorias(){
+void atualizarTabelaPontos(){
 
+    lerCsvDadosPartida();
+
+}
+
+void somarPontosDosJogadores(){
+
+// implementar a logica para somar os pontos dos jogadores considerando qeu o nome é unico
+ salvarRankingPontuacao();
+
+}
+
+void tabelaRankingVitoriasGeral(){
+
+
+
+}
+void TabelaRankingVitorias4Jogadores(){
+
+}
+void TabelaRankingVitorias3Jogadores(){
+
+}
+void TabelaRankingVitorias2Jogadores(){
+
+}
+
+void atualizarTabelaVitorias(){
+
+    lerCsvDadosPartida();
 
 }
 
@@ -1231,7 +1319,51 @@ void tela_Ranking()
     }
     else if (opcao == 2)
     {
-        tabelaRankingVitorias();
+        limparTela(); // Limpa o console antes de exibir a tela de ranking
+
+    int opcao;
+    cout << "\033[1;31m[1] - Digite 1 para ver o ranking Geral\nOpcao: \033[0m";
+    cout << "\033[1;31m[1] - Digite 2 para ver o ranking de Vitorias de partidas com 4 Jogadores\nOpcao: \033[0m";
+    cout << "\033[1;31m[1] - Digite 3 para ver o ranking de Vitorias de partidas com 3 Jogadores\nOpcao: \033[0m";
+    cout << "\033[1;31m[1] - Digite 4 para ver o ranking de Vitorias de partidas com 2 Jogadores\nOpcao: \033[0m";
+    cout << "\033[1;31m[1] - Digite 5 para Voltar\nOpcao: \033[0m";
+
+    cin >> opcao;
+
+    if (opcao == 1)
+    {
+        tabelaRankingVitoriasGeral();
+    }
+    else if (opcao == 2)
+    {
+        TabelaRankingVitorias4Jogadores();
+    }
+    else if (opcao == 3)
+    {
+        TabelaRankingVitorias3Jogadores();
+    }
+     else if (opcao == 4)
+    {
+        TabelaRankingVitorias2Jogadores();
+    }
+    else if (opcao == 5)
+    {
+        tela_Ranking();
+    }
+    else 
+    {
+        limparTela();
+        cout << "opcao invalida";
+        system("pause");
+        tela_Ranking();
+    }
+
+    atualizarTabelaVitorias();
+
+    ifstream arquivo_jogadores("rankingVitoriasPartidas.csv", ios::in);
+
+    //implementar a logica para exibir o ranking 
+
     }
     else if (opcao == 3)
     {
