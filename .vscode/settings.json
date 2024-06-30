@@ -42,7 +42,9 @@
         "tuple": "cpp",
         "type_traits": "cpp",
         "utility": "cpp",
-        "initializer_list": "cpp"
+        "initializer_list": "cpp",
+        "iomanip": "cpp",
+        "map": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

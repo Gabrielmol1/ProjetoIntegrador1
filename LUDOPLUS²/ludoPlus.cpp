@@ -12,8 +12,6 @@
 
 using namespace std;
 
-//teste comit
-
 time_t tempoInicial;
 
 const int TAMANHO_TABULEIRO = 15;
@@ -65,12 +63,16 @@ Celula calcularNovaPosicao(Celula posicaoAtual, int movimentos) {
     return posicaoAtual;
 }
 
-// Declaração das funções
+// Declaração das funções em ordem sequecial 
 void salvarJogador_txt(string nome, string senha);
 void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<string, string>> jogadoresCores, vector<pair<string, pair<string, int>>> ranking);
-void lerCsvDadosPartida();
+void salvarVitoriasGeral(const unordered_map<string, int>& vitoriasGeral);
+void salvarVitorias4Jogadores(const unordered_map<string, int>& vitorias4Jogadores);
+void salvarVitorias3Jogadores(const unordered_map<string, int>& vitorias3Jogadores);
+void salvarVitorias2Jogadores(const unordered_map<string, int>& vitorias2Jogadores);
+vector<string> lerCsvDadosPartidatoHistorico();
+void lerCsvDadosPartidatoRanking(unordered_map<string, int>& vitoriasGeral, unordered_map<string, int>& vitorias4Jogadores, unordered_map<string, int>& vitorias3Jogadores, unordered_map<string, int>& vitorias2Jogadores);
 void salvarRankingPontuacao();
-void salvarRankingVitorias();
 void solicitarDadosJogador(string &nome, string &senha, string &perguntaSeguranca, string &respostaPergunta);
 void salvarEditarPerfil(string nomeAtual, string senhaAtual);
 void fecharJogo();
@@ -85,6 +87,7 @@ void TabelaRankingVitorias4Jogadores();
 void TabelaRankingVitorias3Jogadores();
 void TabelaRankingVitorias2Jogadores();
 void atualizarTabelaVitorias();
+void exibirHistorico(const string& nomeJogador, const vector<string>& linhasPartida);
 bool verificarSenhasIguais(const string &senha, const string &confirmarSenha);
 bool verificarRespostasIguais(const string &resposta, const string &confirmarResposta);
 void excluirPerfil(const string &nome, const string &senha, const string &respostaPergunta);
@@ -102,7 +105,7 @@ bool verificarPosicao(vector<vector<char>> &tabuleiro, int linha, int coluna, ch
 void retirarPecaDaToca(vector<vector<char>> &tabuleiro, char cor);
 void capturarPeoesAdversarios(vector<vector<char>> &tabuleiro, int linha, int coluna, char corAdversario);
 
-// telas 
+// telas em ordem sequencial  
 
 void tela_Login();
 void tela_Menu();
@@ -177,48 +180,127 @@ void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<stri
     }
 }
 
-void lerCsvDadosPartida(){
+void salvarVitoriasGeral(const unordered_map<string, int>& vitoriasGeral) {
+    ofstream arquivo("rankingVitoriasPartidas.csv", ios::out);
+    if (!arquivo.is_open()) {
+        cout << "Erro ao abrir o arquivo de ranking de vitórias." << endl;
+        return;
+    }
 
-    ifstream arquivo_jogadores("DadosPartida.csv", ios::in);
+    for (const auto& par : vitoriasGeral) {
+        arquivo << par.first << "," << par.second << endl;
+    }
 
-    //passar os jogadores e suas pontuaçoes somarPontosDosJogadores();
-
-    somarPontosDosJogadores();
-
-    // passar os dados das partidas para 
-
+    arquivo.close();
 }
 
-void salvarRankingPontuacao(){
+void salvarVitorias4Jogadores(const unordered_map<string, int>& vitorias4Jogadores) {
+    ofstream arquivo("rankingVitorias4Jogadores.csv", ios::out);
+    if (!arquivo.is_open()) {
+        cout << "Erro ao abrir o arquivo de ranking de vitórias de 4 jogadores." << endl;
+        return;
+    }
 
-     ofstream arquivo_jogadores("rankingPontuacao.csv", ios::app);
-    if (arquivo_jogadores.is_open())
-    {
-        //colocar aqui a logica para salvar os jogadores e suas pontuaçoes
+    for (const auto& par : vitorias4Jogadores) {
+        arquivo << par.first << "," << par.second << endl;
     }
-    else
-    {
-        limparTela();
-        cout << "Erro ao abrir o arquivo de jogadores." << endl;
-        system("pause");
-        tela_Login();
-    }
+
+    arquivo.close();
 }
 
-void salvarRankingVitorias(){
+void salvarVitorias3Jogadores(const unordered_map<string, int>& vitorias3Jogadores) {
+    ofstream arquivo("rankingVitorias3Jogadores.csv", ios::out);
+    if (!arquivo.is_open()) {
+        cout << "Erro ao abrir o arquivo de ranking de vitórias de 3 jogadores." << endl;
+        return;
+    }
 
-     ofstream arquivo_jogadores("rankingVitoriasPartidas.csv", ios::app);
-    if (arquivo_jogadores.is_open())
-    {
-        //colocar aqui a logica para salvar os jogadores e suas pontuaçoes
+    for (const auto& par : vitorias3Jogadores) {
+        arquivo << par.first << "," << par.second << endl;
     }
-    else
-    {
-        limparTela();
-        cout << "Erro ao abrir o arquivo de jogadores." << endl;
-        system("pause");
-        tela_Login();
+
+    arquivo.close();
+}
+
+void salvarVitorias2Jogadores(const unordered_map<string, int>& vitorias2Jogadores) {
+    ofstream arquivo("rankingVitorias2Jogadores.csv", ios::out);
+    if (!arquivo.is_open()) {
+        cout << "Erro ao abrir o arquivo de ranking de vitórias de 2 jogadores." << endl;
+        return;
     }
+
+    for (const auto& par : vitorias2Jogadores) {
+        arquivo << par.first << "," << par.second << endl;
+    }
+
+    arquivo.close();
+}
+
+vector<string> lerCsvDadosPartidatoHistorico() {
+    vector<string> linhasPartida;
+    ifstream arquivo("DadosPartida.csv", ios::in);
+    if (!arquivo.is_open()) {
+        cout << "Erro ao abrir o arquivo de dados da partida." << endl;
+        return linhasPartida;
+    }
+
+    string linha;
+    while (getline(arquivo, linha)) {
+        linhasPartida.push_back(linha);
+    }
+
+    arquivo.close();
+    return linhasPartida;
+}
+
+void lerCsvDadosPartidatoRanking(unordered_map<string, int>& vitoriasGeral, unordered_map<string, int>& vitorias4Jogadores, unordered_map<string, int>& vitorias3Jogadores, unordered_map<string, int>& vitorias2Jogadores) {
+    ifstream arquivo("DadosPartida.csv", ios::in);
+    if (!arquivo.is_open()) {
+        cout << "Erro ao abrir o arquivo de dados da partida." << endl;
+        return;
+    }
+
+    string linha;
+    while (getline(arquivo, linha)) {
+        stringstream ss(linha);
+        string campo;
+        vector<string> dadosLinha;
+
+        while (getline(ss, campo, ',')) {
+            dadosLinha.push_back(campo);
+        }
+
+        if (dadosLinha.size() >= 4) {
+            int numJogadores = stoi(dadosLinha[0]);
+            string vencedor = dadosLinha[1];
+
+            // Atualiza o número de vitórias
+            vitoriasGeral[vencedor]++;
+            if (numJogadores == 4) {
+                vitorias4Jogadores[vencedor]++;
+            } else if (numJogadores == 3) {
+                vitorias3Jogadores[vencedor]++;
+            } else if (numJogadores == 2) {
+                vitorias2Jogadores[vencedor]++;
+            }
+        }
+    }
+
+    arquivo.close();
+}
+
+void salvarRankingPontuacao(const unordered_map<string, int>& pontosJogadores) {
+    ofstream arquivo("rankingPontuacao.csv", ios::out);
+    if (!arquivo.is_open()) {
+        cout << "Erro ao abrir o arquivo de ranking de pontuação." << endl;
+        return;
+    }
+
+    for (const auto& par : pontosJogadores) {
+        arquivo << par.first << "," << par.second << endl;
+    }
+
+    arquivo.close();
 }
 
 void solicitarDadosJogador(string &nome, string &senha, string &perguntaSeguranca, string &respostaPergunta)
@@ -433,53 +515,134 @@ bool verificarNomeExistente(const string &nome)
     return false;
 }
 
-void tabelaRankingPontos(){
-
+void tabelaRankingPontos() {
     atualizarTabelaPontos();
 
-    ifstream arquivo_jogadores("rankingPontuacao.csv", ios::in);
+    ifstream arquivo("rankingPontuacao.csv", ios::in);
+    if (!arquivo.is_open()) {
+        cout << "Erro ao abrir o arquivo de ranking de pontuação." << endl;
+        return;
+    }
 
-    //implementar a logica para exibir o ranking dos jogadores
+    string linha;
+    while (getline(arquivo, linha)) {
+        cout << linha << endl;
+    }
 
+    arquivo.close();
 }
 
-void atualizarTabelaPontos(){
+void atualizarTabelaPontos() {
+    unordered_map<string, int> pontosJogadores;
+    vector<pair<string, pair<string, int>>> ranking;
 
-    lerCsvDadosPartida();
+    lerCsvDadosPartidatoRanking(pontosJogadores, ranking);
 
+    salvarRankingPontuacao(pontosJogadores);
 }
 
-void somarPontosDosJogadores(){
-
-// implementar a logica para somar os pontos dos jogadores considerando qeu o nome é unico
- salvarRankingPontuacao();
-
+void somarPontosDosJogadores(unordered_map<string, int>& pontosJogadores, const vector<pair<string, pair<string, int>>>& ranking) {
+    for (const auto& par : ranking) {
+        pontosJogadores[par.first] += par.second.second;  // Adiciona os pontos do jogador
+    }
 }
 
-void tabelaRankingVitoriasGeral(){
+void tabelaRankingVitoriasGeral() {
+    atualizarTabelaVitorias();
 
+    ifstream arquivo("rankingVitoriasPartidas.csv", ios::in);
+    if (!arquivo.is_open()) {
+        cout << "Erro ao abrir o arquivo de ranking de vitórias." << endl;
+        return;
+    }
 
+    string linha;
+    while (getline(arquivo, linha)) {
+        cout << linha << endl;
+    }
 
+    arquivo.close();
 }
-void TabelaRankingVitorias4Jogadores(){
 
+void TabelaRankingVitorias4Jogadores() {
+    atualizarTabelaVitorias();
+
+    ifstream arquivo("rankingVitorias4Jogadores.csv", ios::in);
+    if (!arquivo.is_open()) {
+        cout << "Erro ao abrir o arquivo de ranking de vitórias de 4 jogadores." << endl;
+        return;
+    }
+
+    string linha;
+    while (getline(arquivo, linha)) {
+        cout << linha << endl;
+    }
+
+    arquivo.close();
 }
-void TabelaRankingVitorias3Jogadores(){
 
+void TabelaRankingVitorias3Jogadores() {
+    atualizarTabelaVitorias();
+
+    ifstream arquivo("rankingVitorias3Jogadores.csv", ios::in);
+    if (!arquivo.is_open()) {
+        cout << "Erro ao abrir o arquivo de ranking de vitórias de 3 jogadores." << endl;
+        return;
+    }
+
+    string linha;
+    while (getline(arquivo, linha)) {
+        cout << linha << endl;
+    }
+
+    arquivo.close();
 }
-void TabelaRankingVitorias2Jogadores(){
 
+void TabelaRankingVitorias2Jogadores() {
+    atualizarTabelaVitorias();
+
+    ifstream arquivo("rankingVitorias2Jogadores.csv", ios::in);
+    if (!arquivo.is_open()) {
+        cout << "Erro ao abrir o arquivo de ranking de vitórias de 2 jogadores." << endl;
+        return;
+    }
+
+    string linha;
+    while (getline(arquivo, linha)) {
+        cout << linha << endl;
+    }
+
+    arquivo.close();
 }
 
-void atualizarTabelaVitorias(){
+void atualizarTabelaVitorias() {
 
-    lerCsvDadosPartida();
+    unordered_map<string, int> vitoriasGeral;
+    unordered_map<string, int> vitorias4Jogadores;
+    unordered_map<string, int> vitorias3Jogadores;
+    unordered_map<string, int> vitorias2Jogadores;
 
+    lerCsvDadosPartidatoRanking(vitoriasGeral, vitorias4Jogadores, vitorias3Jogadores, vitorias2Jogadores);
+
+    salvarVitoriasGeral(vitoriasGeral);
+    salvarVitorias4Jogadores(vitorias4Jogadores);
+    salvarVitorias3Jogadores(vitorias3Jogadores);
+    salvarVitorias2Jogadores(vitorias2Jogadores);
 }
 
 bool verificarTamanhoSenha(const string &senha)
 {
     return senha.length() >= 6;
+}
+
+void exibirHistorico(const string& nomeJogador, const vector<string>& linhasPartida) {
+    cout << "Historico de partidas para o jogador: " << nomeJogador << endl;
+
+    for (const auto& linha : linhasPartida) {
+        if (linha.find(nomeJogador) != string::npos) {
+            cout << linha << endl;
+        }
+    }
 }
 
 bool verificarSenhasIguais(const string &senha, const string &confirmarSenha)
@@ -1160,9 +1323,8 @@ void tela_Login()
     }
 }
 
-void tela_Menu()
-{
-    system("cls");
+void tela_Menu() {
+    limparTela();
 
     int opcao_Menu;
 
@@ -1181,33 +1343,20 @@ void tela_Menu()
 
     cin >> opcao_Menu;
 
-    if (opcao_Menu == 1)
-    {
+    if (opcao_Menu == 1) {
         selecionarQuantidadeJogParaPartida();
-    }
-    else if (opcao_Menu == 2)
-    {
+    } else if (opcao_Menu == 2) {
         tela_Ranking();
-    }
-    else if (opcao_Menu == 3)
-    {
+    } else if (opcao_Menu == 3) {
         tela_HistoricoPartidas();
-    }
-    else if (opcao_Menu == 4)
-    {
+    } else if (opcao_Menu == 4) {
         tela_EditarPerfil();
-    }
-    else if (opcao_Menu == 5)
-    {
+    } else if (opcao_Menu == 5) {
         tela_Regras();
-    }
-    else if (opcao_Menu == 6)
-    {
+    } else if (opcao_Menu == 6) {
         tela_Login();
-    }
-    else
-    {
-        system("cls");
+    } else {
+        limparTela();
         cout << "opção invalida, tente novamente";
         system("pause");
         tela_Menu();
@@ -1305,75 +1454,48 @@ void tela_Jogar(const vector<string> &nomesJogadores, const vector<string> &core
     }
 }
 
-void tela_Ranking()
-{
-    system("cls"); // Limpa o console antes de exibir a tela de ranking
+void tela_Ranking() {
+    
+    limparTela();
 
     int opcao;
-    cout << "\033[1;31m[1] - Digite 1 para ver o ranking de Pontos\nOpcao: \033[0m";
-    cout << "\033[1;31m[1] - Digite 2 para ver o ranking de Vitorias\nOpcao: \033[0m";
-    cout << "\033[1;31m[1] - Digite 3 para Voltar\nOpcao: \033[0m";
-
+    cout << "[1] - Digite 1 para ver o ranking de Pontos\n";
+    cout << "[2] - Digite 2 para ver o ranking de Vitorias\n";
+    cout << "[3] - Digite 3 para Voltar\nOpcao: ";
     cin >> opcao;
 
-    if (opcao == 1)
-    {
+    if (opcao == 1) {
         tabelaRankingPontos();
-    }
-    else if (opcao == 2)
-    {
-        limparTela(); // Limpa o console antes de exibir a tela de ranking
-
-    int opcao;
-    cout << "\033[1;31m[1] - Digite 1 para ver o ranking Geral\nOpcao: \033[0m";
-    cout << "\033[1;31m[1] - Digite 2 para ver o ranking de Vitorias de partidas com 4 Jogadores\nOpcao: \033[0m";
-    cout << "\033[1;31m[1] - Digite 3 para ver o ranking de Vitorias de partidas com 3 Jogadores\nOpcao: \033[0m";
-    cout << "\033[1;31m[1] - Digite 4 para ver o ranking de Vitorias de partidas com 2 Jogadores\nOpcao: \033[0m";
-    cout << "\033[1;31m[1] - Digite 5 para Voltar\nOpcao: \033[0m";
-
-    cin >> opcao;
-
-    if (opcao == 1)
-    {
-        tabelaRankingVitoriasGeral();
-    }
-    else if (opcao == 2)
-    {
-        TabelaRankingVitorias4Jogadores();
-    }
-    else if (opcao == 3)
-    {
-        TabelaRankingVitorias3Jogadores();
-    }
-     else if (opcao == 4)
-    {
-        TabelaRankingVitorias2Jogadores();
-    }
-    else if (opcao == 5)
-    {
-        tela_Ranking();
-    }
-    else 
-    {
+    } else if (opcao == 2) {
         limparTela();
-        cout << "opcao invalida";
-        system("pause");
-        tela_Ranking();
-    }
 
-    atualizarTabelaVitorias();
+        int subOpcao;
+        cout << "[1] - Digite 1 para ver o ranking Geral\n";
+        cout << "[2] - Digite 2 para ver o ranking de Vitorias de partidas com 4 Jogadores\n";
+        cout << "[3] - Digite 3 para ver o ranking de Vitorias de partidas com 3 Jogadores\n";
+        cout << "[4] - Digite 4 para ver o ranking de Vitorias de partidas com 2 Jogadores\n";
+        cout << "[5] - Digite 5 para Voltar\nOpcao: ";
+        cin >> subOpcao;
 
-    ifstream arquivo_jogadores("rankingVitoriasPartidas.csv", ios::in);
-
-    //implementar a logica para exibir o ranking 
-
-    }
-    else if (opcao == 3)
-    {
+        if (subOpcao == 1) {
+            tabelaRankingVitoriasGeral();
+        } else if (subOpcao == 2) {
+            TabelaRankingVitorias4Jogadores();
+        } else if (subOpcao == 3) {
+            TabelaRankingVitorias3Jogadores();
+        } else if (subOpcao == 4) {
+            TabelaRankingVitorias2Jogadores();
+        } else if (subOpcao == 5) {
+            tela_Ranking();
+        } else {
+            limparTela();
+            cout << "opcao invalida";
+            system("pause");
+            tela_Ranking();
+        }
+    } else if (opcao == 3) {
         tela_Menu();
-    }
-    else 
-    {
+    } else {
         limparTela();
         cout << "opcao invalida";
         system("pause");
@@ -1381,65 +1503,30 @@ void tela_Ranking()
     }
 }
 
-void tela_HistoricoPartidas()
-{
+void tela_HistoricoPartidas() {
+
     system("cls"); // Limpa o console antes de exibir o histórico de partidas
 
-    ifstream arquivo_dadosPartida("dadosPartida.txt");
-    if (arquivo_dadosPartida.is_open())
-    {
-        cout << "\033[1;31m==============\033[0m HISTORICO DA PARTIDA \033[1;31m==============\033[0m" << endl;
-        cout << "Numero da Partida\tData e Hora\tJogadores e Cores\tRanking" << endl;
+    string nomeJogador;
+    cout << "Digite o nome do jogador para ver o historico de partidas: ";
+    cin >> nomeJogador;
 
-        string linha;
-        while (getline(arquivo_dadosPartida, linha))
-        {
-            vector<string> partes;
-            size_t pos = 0;
-            string token;
-            while ((pos = linha.find("-")) != string::npos)
-            {
-                token = linha.substr(0, pos);
-                partes.push_back(token);
-                linha.erase(0, pos + 1);
-            }
-            partes.push_back(linha); // Adiciona a última parte
-
-            // Extrair informações da linha
-            string numPartida, dataHora, jogadoresCores, ranking;
-            if (partes.size() >= 4)
-            {
-                numPartida = partes[0];
-                dataHora = partes[1];
-                jogadoresCores = partes[2];
-                ranking = partes[3];
-            }
-
-            // Exibir as informações formatadas na tabela
-            cout << numPartida << "\t" << dataHora << "\t" << jogadoresCores << "\t" << ranking << endl;
-        }
-        arquivo_dadosPartida.close();
-    }
-    else
-    {
-        system("cls");
-        cout << "Erro ao abrir o arquivo de histórico de partidas.";
-        system("pause");
-        tela_Menu();
+    vector<string> linhasPartida = lerCsvDadosPartida();
+    if (linhasPartida.empty()) {
+        cout << "Nao foi possivel ler o arquivo de dados da partida ou nao ha partidas registradas." << endl;
+    } else {
+        exibirHistorico(nomeJogador, linhasPartida);
     }
 
     int opcao;
-    cout << "\033[1;31m[1] - Digite 1 para Voltar\nOpcao desejada: \033[0m";
+    cout << "\n[1] - Digite 1 para Voltar\nOpcao: ";
     cin >> opcao;
 
-    if (opcao == 1)
-    {
+    if (opcao == 1) {
         tela_Menu();
-    }
-    else
-    {
+    } else {
         system("cls");
-        cout << "opcao invalida" << endl;
+        cout << "Opcao invalida. Tente novamente." << endl;
         system("pause");
         tela_HistoricoPartidas();
     }
