@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <conio.h>   // Para usar _kbhit() e _getch()
 #include <windows.h> // Para usar Sleep() e SetConsoleTextAttribute()
-
+#include <sstream> // para a classe stringstream
 using namespace std;
 
 time_t tempoInicial;
@@ -32,36 +32,6 @@ struct Celula {
 
     Celula(int l = -1, int c = -1) : linha(l), coluna(c) {}
 };
-
-
-Celula calcularNovaPosicao(Celula posicaoAtual, int movimentos) {
-    while (movimentos > 0) {
-        if (posicaoAtual.linha == 6 && posicaoAtual.coluna < 6)
-            posicaoAtual.coluna++;
-        else if (posicaoAtual.coluna == 6 && posicaoAtual.linha > 0)
-            posicaoAtual.linha--;
-        else if (posicaoAtual.linha == 0 && posicaoAtual.coluna < 14)
-            posicaoAtual.coluna++;
-        else if (posicaoAtual.coluna == 14 && posicaoAtual.linha < 14)
-            posicaoAtual.linha++;
-        else if (posicaoAtual.linha == 14 && posicaoAtual.coluna > 0)
-            posicaoAtual.coluna--;
-        else if (posicaoAtual.coluna == 0 && posicaoAtual.linha > 6)
-            posicaoAtual.linha--;
-        else if (posicaoAtual.linha == 7 && posicaoAtual.coluna < 7)
-            posicaoAtual.coluna++;
-        else if (posicaoAtual.coluna == 7 && posicaoAtual.linha < 7)
-            posicaoAtual.linha++;
-        else if (posicaoAtual.linha == 7 && posicaoAtual.coluna > 7)
-            posicaoAtual.coluna--;
-        else if (posicaoAtual.coluna == 7 && posicaoAtual.linha > 7)
-            posicaoAtual.linha--;
-
-        movimentos--;
-    }
-
-    return posicaoAtual;
-}
 
 // Declaração das funções em ordem sequecial 
 void salvarJogador_txt(string nome, string senha);
@@ -100,11 +70,15 @@ int lancarDado();
 bool moverPeao(vector<vector<char>> &tabuleiro, char cor, int movimentos);
 vector<vector<char>> criarTabuleiro();
 bool realizarJogada(vector<vector<char>> &tabuleiro, char cor);
+void capturarPeoesAdversarios(vector<vector<char>> &tabuleiro, int linha, int coluna, char corAdversario);
 bool existePecaNoTabuleiro(const vector<vector<char>> &tabuleiro, char cor);
 bool verificarPosicao(vector<vector<char>> &tabuleiro, int linha, int coluna, char cor);
 void retirarPecaDaToca(vector<vector<char>> &tabuleiro, char cor);
-void capturarPeoesAdversarios(vector<vector<char>> &tabuleiro, int linha, int coluna, char corAdversario);
-
+vector<Celula> definirPercursoVermelho(); //defini percurso cor vermelha
+vector<Celula> definirPercursoAzul(); //defini percurso do azul
+vector<Celula> definirPercursoAmarelo(); //defini percurso amarelo
+vector<Celula> definirPercursoVerde(); //defini percurso verde
+Celula calcularNovaPosicao(const Celula &peao, int movimentos, const vector<Celula> &percurso);
 // telas em ordem sequencial  
 
 void tela_Login();
@@ -120,8 +94,8 @@ void tela_Regras();
 void tela_ExcluirPerfil();
 
 int main() {
-    //tela_Login();
-    selecionarQuantidadeJogParaPartida();
+    tela_Login();
+    //selecionarQuantidadeJogParaPartida();
     return 0;
 }
 
@@ -149,7 +123,7 @@ void salvarJogador_txt(const string &nome, const string &senha, const string &pe
     }
 }
 
-void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<string, string>> jogadoresCores, vector<pair<string, pair<string, int>>> ranking)
+void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<string, string>> jogadoresCores, unordered_map<string, int> ranking)
 {
     ofstream arquivo("dadosPartida.txt", ios::app);
     if (arquivo.is_open())
@@ -162,7 +136,7 @@ void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<stri
         arquivo << "- ";
         for (const auto &jogadorPontos : ranking)
         {
-            arquivo << jogadorPontos.first << " (" << jogadorPontos.second.first << " - " << jogadorPontos.second.second << " pontos), ";
+            arquivo << jogadorPontos.first << " - " << jogadorPontos.second << " pontos, ";
         }
         arquivo << endl;
         arquivo.close();
@@ -532,13 +506,13 @@ void tabelaRankingPontos() {
     arquivo.close();
 }
 
-void atualizarTabelaPontos() {
-    unordered_map<string, int> pontosJogadores;
-    vector<pair<string, pair<string, int>>> ranking;
+ void atualizarTabelaPontos() {
+//     unordered_map<string, int> pontosJogadores;
+//     vector<pair<string, pair<string, int>>> ranking;
 
-    lerCsvDadosPartidatoRanking(pontosJogadores, ranking);
+//     lerCsvDadosPartidatoRanking(pontosJogadores, ranking);
 
-    salvarRankingPontuacao(pontosJogadores);
+//     salvarRankingPontuacao(pontosJogadores);
 }
 
 void somarPontosDosJogadores(unordered_map<string, int>& pontosJogadores, const vector<pair<string, pair<string, int>>>& ranking) {
@@ -931,6 +905,59 @@ void imprimirTabuleiroColorido(const vector<vector<char>> &tabuleiro){
     }
 }
 
+vector<Celula> definirPercursoVermelho() {
+    return {
+        {6, 2}, {6, 3}, {6, 4}, {6, 5}, {6, 6}, {5, 6}, {4, 6}, {3, 6}, {2, 6}, {1, 6}, {1, 7}, {1, 8},
+        {2, 8}, {3, 8}, {4, 8}, {5, 8}, {6, 8}, {6, 9}, {6, 10}, {6, 11}, {6, 12}, {6, 13}, {7, 13},
+        {8, 13}, {8, 12}, {8, 11}, {8, 10}, {8, 9}, {8, 8}, {9, 8}, {10, 8}, {11, 8}, {12, 8}, {13, 8},
+        {13, 7}, {13, 6}, {12, 6}, {11, 6}, {10, 6}, {9, 6}, {8, 6}, {8, 5}, {8, 4}, {8, 3}, {8, 2},
+        {8, 1}, {7, 1}, {6, 1}, {6, 2}
+    };
+}
+
+vector<Celula> definirPercursoAzul() {
+    return {
+        {2, 8}, {3, 8}, {4, 8}, {5, 8}, {6, 8}, {6, 9}, {6, 10}, {6, 11}, {6, 12}, {6, 13}, {7, 13},
+        {8, 13}, {8, 12}, {8, 11}, {8, 10}, {8, 9}, {8, 8}, {9, 8}, {10, 8}, {11, 8}, {12, 8}, {13, 8},
+        {13, 7}, {13, 6}, {12, 6}, {11, 6}, {10, 6}, {9, 6}, {8, 6}, {8, 5}, {8, 4}, {8, 3}, {8, 2},
+        {8, 1}, {7, 1}, {6, 1}, {6, 2}, {6, 3}, {6, 4}, {6, 5}, {6, 6}, {5, 6}, {4, 6}, {3, 6}, {2, 6},
+        {1, 6}, {1, 7}, {1, 8}, {2, 8}
+    };
+}
+
+vector<Celula> definirPercursoAmarelo() {
+    return {
+        {8, 12}, {8, 11}, {8, 10}, {8, 9}, {8, 8}, {9, 8}, {10, 8}, {11, 8}, {12, 8}, {13, 8}, {13, 7},
+        {13, 6}, {12, 6}, {11, 6}, {10, 6}, {9, 6}, {8, 6}, {8, 5}, {8, 4}, {8, 3}, {8, 2}, {8, 1},
+        {7, 1}, {6, 1}, {6, 2}, {6, 3}, {6, 4}, {6, 5}, {6, 6}, {5, 6}, {4, 6}, {3, 6}, {2, 6}, {1, 6},
+        {1, 7}, {1, 8}, {2, 8}, {3, 8}, {4, 8}, {5, 8}, {6, 8}, {6, 9}, {6, 10}, {6, 11}, {6, 12},
+        {6, 13}, {7, 13}, {8, 13}, {8, 12}
+    };
+}
+
+vector<Celula> definirPercursoVerde() {
+    return {
+        {12, 6}, {11, 6}, {10, 6}, {9, 6}, {8, 6}, {8, 5}, {8, 4}, {8, 3}, {8, 2}, {8, 1}, {7, 1},
+        {6, 1}, {6, 2}, {6, 3}, {6, 4}, {6, 5}, {6, 6}, {5, 6}, {4, 6}, {3, 6}, {2, 6}, {1, 6},
+        {1, 7}, {1, 8}, {2, 8}, {3, 8}, {4, 8}, {5, 8}, {6, 8}, {6, 9}, {6, 10}, {6, 11}, {6, 12},
+        {6, 13}, {7, 13}, {8, 13}, {8, 12}, {8, 11}, {8, 10}, {8, 9}, {8, 8}, {9, 8}, {10, 8},
+        {11, 8}, {12, 8}, {13, 8}, {13, 7}, {13, 6}, {12, 6}
+    };
+}
+
+Celula calcularNovaPosicao(const Celula &peao, int movimentos, const vector<Celula> &percurso) {
+    int posicaoAtual = 0;
+    for (size_t i = 0; i < percurso.size(); ++i) {
+        if (percurso[i].linha == peao.linha && percurso[i].coluna == peao.coluna) {
+            posicaoAtual = i;
+            break;
+        }
+    }
+
+    int novaPosicao = (posicaoAtual + movimentos) % percurso.size();
+    return percurso[novaPosicao];
+}
+
 string trim(const string &str)
 {
     size_t first = str.find_first_not_of(' ');
@@ -943,11 +970,10 @@ int lancarDado()
     return rand() % 6 + 1; // Gera um número aleatório de 1 a 6
 }
 
-bool moverPeao(vector<vector<char>> &tabuleiro, char cor, int movimentos) {
+bool moverPeao(vector<vector<char>> &tabuleiro, char cor, int movimentos, const vector<Celula> &percurso) {
     Celula peao;
     bool encontrado = false;
-
-    // Encontrar a posição atual do peão
+    
     for (int i = 0; i < TAMANHO_TABULEIRO; ++i) {
         for (int j = 0; j < TAMANHO_TABULEIRO; ++j) {
             if (tabuleiro[i][j] == cor) {
@@ -965,26 +991,16 @@ bool moverPeao(vector<vector<char>> &tabuleiro, char cor, int movimentos) {
         return false;
     }
 
-    cout << "Peao da cor " << cor << " encontrado na posição (" << peao.linha << ", " << peao.coluna << ")." << endl;
+    Celula novaPosicao = calcularNovaPosicao(peao, movimentos, percurso);
 
-    // Calcular a nova posição do peão
-    Celula novaPosicao = calcularNovaPosicao(peao, movimentos);
-
-    cout << "Movendo para posição (" << novaPosicao.linha << ", " << novaPosicao.coluna << ")." << endl;
-
-    // Verificar se a nova posição é válida
     if (!verificarPosicao(tabuleiro, novaPosicao.linha, novaPosicao.coluna, cor)) {
-        cout << "Movimento invalido. Posicao ja ocupada por uma peca da mesma cor." << endl;
         return false;
     }
 
-    // Atualizar a posição do peão
     tabuleiro[peao.linha][peao.coluna] = '.';
     tabuleiro[novaPosicao.linha][novaPosicao.coluna] = cor;
 
-    cout << "Peao da cor " << cor << " movido para posição (" << novaPosicao.linha << ", " << novaPosicao.coluna << ")." << endl;
-
-    return false;
+    return true;
 }
 
 vector<vector<char>> criarTabuleiro()
@@ -1168,12 +1184,23 @@ bool realizarJogada(vector<vector<char>> &tabuleiro, char cor) {
     return false;
 }
 
+bool verificarPosicao(vector<vector<char>> &tabuleiro, int linha, int coluna, char cor) {
+    char celula = tabuleiro[linha][coluna];
+    if (celula == ' ' || celula == '.') {
+        return true;
+    } else if (celula == cor) {
+        return false;
+    } else {
+        capturarPeoesAdversarios(tabuleiro, linha, coluna, celula);
+        return true;
+    }
+}
+
 void capturarPeoesAdversarios(vector<vector<char>> &tabuleiro, int linha, int coluna, char corAdversario) {
     auto toca = posicoesTocas.at(corAdversario);
     if (tabuleiro[linha][coluna] == corAdversario) {
-        tabuleiro[linha][coluna] = '.';  // Limpa a posição atual do peão adversário
-        tabuleiro[toca.first][toca.second] = corAdversario;  // Move o peão adversário para a toca
-        cout << "Peao " << corAdversario << " enviado de volta para a toca em (" << toca.first << ", " << toca.second << ")." << endl;
+        tabuleiro[linha][coluna] = '.';
+        tabuleiro[toca.first][toca.second] = corAdversario;
     }
 }
 
@@ -1192,81 +1219,64 @@ bool existePecaNoTabuleiro(const vector<vector<char>> &tabuleiro, char cor)
     return false;
 }
 
-bool verificarPosicao(vector<vector<char>> &tabuleiro, int linha, int coluna, char cor) {
-    char celula = tabuleiro[linha][coluna];
-    if (celula == ' ' || celula == '.') {
-        // Posição vazia ou célula do caminho, pode mover
-        return true;
-    } else if (celula == cor) {
-        // Posição já ocupada por uma peça da mesma cor, não pode mover
-        return false;
-    } else {
-        // Posição ocupada por uma peça adversária, capturar
-        capturarPeoesAdversarios(tabuleiro, linha, coluna, celula);
-        return true;
-    }
-}
-
 void retirarPecaDaToca(vector<vector<char>> &tabuleiro, char cor) {
     if (cor == 'R') {
-        // Encontra uma peça vermelha na base (toca) e a remove
         if (tabuleiro[2][2] == 'A') {
             tabuleiro[2][2] = ' ';
-            tabuleiro[6][2] = 'A'; // Posição inicial do vermelho
+            tabuleiro[6][2] = 'A';
         } else if (tabuleiro[2][4] == 'B') {
             tabuleiro[2][4] = ' ';
-            tabuleiro[6][2] = 'B'; // Posição inicial do vermelho
+            tabuleiro[6][2] = 'B';
         } else if (tabuleiro[4][2] == 'C') {
             tabuleiro[4][2] = ' ';
-            tabuleiro[6][2] = 'C'; // Posição inicial do vermelho
+            tabuleiro[6][2] = 'C';
         } else if (tabuleiro[4][4] == 'D') {
             tabuleiro[4][4] = ' ';
-            tabuleiro[6][2] = 'D'; // Posição inicial do vermelho
+            tabuleiro[6][2] = 'D';
         }
     } else if (cor == 'B') {
         if (tabuleiro[2][10] == 'A') {
             tabuleiro[2][10] = ' ';
-            tabuleiro[2][8] = 'A'; // Posição inicial do azul
+            tabuleiro[2][8] = 'A';
         } else if (tabuleiro[2][12] == 'B') {
             tabuleiro[2][12] = ' ';
-            tabuleiro[2][8] = 'B'; // Posição inicial do azul
+            tabuleiro[2][8] = 'B';
         } else if (tabuleiro[4][10] == 'C') {
             tabuleiro[4][10] = ' ';
-            tabuleiro[2][8] = 'C'; // Posição inicial do azul
+            tabuleiro[2][8] = 'C';
         } else if (tabuleiro[4][12] == 'D') {
             tabuleiro[4][12] = ' ';
-            tabuleiro[2][8] = 'D'; // Posição inicial do azul
+            tabuleiro[2][8] = 'D';
         }
     } else if (cor == 'Y') {
         if (tabuleiro[10][10] == 'A') {
             tabuleiro[10][10] = ' ';
-            tabuleiro[8][12] = 'A'; // Posição inicial do amarelo
+            tabuleiro[8][12] = 'A';
         } else if (tabuleiro[10][12] == 'B') {
             tabuleiro[10][12] = ' ';
-            tabuleiro[8][12] = 'B'; // Posição inicial do amarelo
+            tabuleiro[8][12] = 'B';
         } else if (tabuleiro[12][10] == 'C') {
             tabuleiro[12][10] = ' ';
-            tabuleiro[8][12] = 'C'; // Posição inicial do amarelo
+            tabuleiro[8][12] = 'C';
         } else if (tabuleiro[12][12] == 'D') {
             tabuleiro[12][12] = ' ';
-            tabuleiro[8][12] = 'D'; // Posição inicial do amarelo
+            tabuleiro[8][12] = 'D';
         }
     } else if (cor == 'G') {
         if (tabuleiro[10][2] == 'A') {
             tabuleiro[10][2] = ' ';
-            tabuleiro[12][6] = 'A'; // Posição inicial do verde
+            tabuleiro[12][6] = 'A';
         } else if (tabuleiro[10][4] == 'B') {
             tabuleiro[10][4] = ' ';
-            tabuleiro[12][6] = 'B'; // Posição inicial do verde
+            tabuleiro[12][6] = 'B';
         } else if (tabuleiro[12][2] == 'C') {
             tabuleiro[12][2] = ' ';
-            tabuleiro[12][6] = 'C'; // Posição inicial do verde
+            tabuleiro[12][6] = 'C';
         } else if (tabuleiro[12][4] == 'D') {
             tabuleiro[12][4] = ' ';
-            tabuleiro[12][6] = 'D'; // Posição inicial do verde
+            tabuleiro[12][6] = 'D';
         }
     }
-    
 }
 
 void limparTela()
@@ -1406,6 +1416,12 @@ void tela_Jogar(const vector<string> &nomesJogadores, const vector<string> &core
         }
     }
 
+    // Definir os percursos de cada cor
+    vector<Celula> percursoVermelho = definirPercursoVermelho();
+    vector<Celula> percursoAzul = definirPercursoAzul();
+    vector<Celula> percursoAmarelo = definirPercursoAmarelo();
+    vector<Celula> percursoVerde = definirPercursoVerde();
+
     while (!jogoTerminado) {
         // Limpar a tela e imprimir o tabuleiro
         limparTela();
@@ -1422,7 +1438,7 @@ void tela_Jogar(const vector<string> &nomesJogadores, const vector<string> &core
 
         if (movimentos == 6) {
             if (!existePecaNoTabuleiro(tabuleiro, corAtual)) {
-                cout << "Voce tirou 6, mas nao tem peças no tabuleiro. Pressione Enter para retirar uma peça da toca." << endl;
+                cout << "Voce tirou 6, mas nao tem pecas no tabuleiro. Pressione Enter para retirar uma peca da toca." << endl;
                 cin.ignore();
                 cin.get();
                 retirarPecaDaToca(tabuleiro, corAtual);
@@ -1434,11 +1450,27 @@ void tela_Jogar(const vector<string> &nomesJogadores, const vector<string> &core
                 if (opcao == 'r' || opcao == 'R') {
                     retirarPecaDaToca(tabuleiro, corAtual);
                 } else {
-                    jogoTerminado = moverPeao(tabuleiro, corAtual, movimentos);
+                    if (corAtual == 'R') {
+                        jogoTerminado = moverPeao(tabuleiro, corAtual, movimentos, percursoVermelho);
+                    } else if (corAtual == 'B') {
+                        jogoTerminado = moverPeao(tabuleiro, corAtual, movimentos, percursoAzul);
+                    } else if (corAtual == 'Y') {
+                        jogoTerminado = moverPeao(tabuleiro, corAtual, movimentos, percursoAmarelo);
+                    } else if (corAtual == 'G') {
+                        jogoTerminado = moverPeao(tabuleiro, corAtual, movimentos, percursoVerde);
+                    }
                 }
             }
         } else {
-            jogoTerminado = moverPeao(tabuleiro, corAtual, movimentos);
+            if (corAtual == 'R') {
+                jogoTerminado = moverPeao(tabuleiro, corAtual, movimentos, percursoVermelho);
+            } else if (corAtual == 'B') {
+                jogoTerminado = moverPeao(tabuleiro, corAtual, movimentos, percursoAzul);
+            } else if (corAtual == 'Y') {
+                jogoTerminado = moverPeao(tabuleiro, corAtual, movimentos, percursoAmarelo);
+            } else if (corAtual == 'G') {
+                jogoTerminado = moverPeao(tabuleiro, corAtual, movimentos, percursoVerde);
+            }
         }
 
         // Verificar se a jogada resultou em término de jogo
@@ -1448,7 +1480,7 @@ void tela_Jogar(const vector<string> &nomesJogadores, const vector<string> &core
         }
 
         // Aguardar um pouco antes de continuar
-        sleep(1); // No Windows, use Sleep(1000) para esperar 1 segundo
+        Sleep(1000); // No Windows, use Sleep(1000) para esperar 1 segundo
 
         rodada++;
     }
@@ -1504,14 +1536,13 @@ void tela_Ranking() {
 }
 
 void tela_HistoricoPartidas() {
-
     system("cls"); // Limpa o console antes de exibir o histórico de partidas
 
     string nomeJogador;
     cout << "Digite o nome do jogador para ver o historico de partidas: ";
     cin >> nomeJogador;
 
-    vector<string> linhasPartida = lerCsvDadosPartida();
+    vector<string> linhasPartida = lerCsvDadosPartidatoHistorico();
     if (linhasPartida.empty()) {
         cout << "Nao foi possivel ler o arquivo de dados da partida ou nao ha partidas registradas." << endl;
     } else {
@@ -1727,3 +1758,7 @@ else
     tela_ExcluirPerfil();
 }
 }
+
+//erro de passada de vector em ranking vitorias 
+//tela historico esta funcionando
+//
