@@ -34,15 +34,16 @@ struct Celula {
 };
 
 // Declaração das funções em ordem sequecial 
-void salvarJogador_txt(string nome, string senha);
-void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<string, string>> jogadoresCores, vector<pair<string, pair<string, int>>> ranking);
+void salvarJogador_txt(const string &nome, const string &senha, const string &perguntaSeguranca, const string &respostaPergunta);
+void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<string, string>> jogadoresCores, unordered_map<string, int> ranking);
 void salvarVitoriasGeral(const unordered_map<string, int>& vitoriasGeral);
 void salvarVitorias4Jogadores(const unordered_map<string, int>& vitorias4Jogadores);
 void salvarVitorias3Jogadores(const unordered_map<string, int>& vitorias3Jogadores);
 void salvarVitorias2Jogadores(const unordered_map<string, int>& vitorias2Jogadores);
 vector<string> lerCsvDadosPartidatoHistorico();
-void lerCsvDadosPartidatoRanking(unordered_map<string, int>& vitoriasGeral, unordered_map<string, int>& vitorias4Jogadores, unordered_map<string, int>& vitorias3Jogadores, unordered_map<string, int>& vitorias2Jogadores);
-void salvarRankingPontuacao();
+void lerCsvDadosPartidatoRankingPontos(vector<pair<string, int>>& pontosJogadores);
+void lerCsvDadosPartidatoRankingPartidas(unordered_map<string, int>& vitoriasGeral, unordered_map<string, int>& vitorias4Jogadores, unordered_map<string, int>& vitorias3Jogadores, unordered_map<string, int>& vitorias2Jogadores);
+void salvarRankingPontuacao(const vector<pair<string, int>>& ranking);
 void solicitarDadosJogador(string &nome, string &senha, string &perguntaSeguranca, string &respostaPergunta);
 void salvarEditarPerfil(string nomeAtual, string senhaAtual);
 void fecharJogo();
@@ -51,7 +52,7 @@ bool verificarNomeExistente(const string &nome);
 bool verificarTamanhoSenha(const string &senha);
 void tabelaRankingPontos();
 void atualizarTabelaPontos();
-void somarPontosDosJogadores();
+void somarPontosDosJogadores(const vector<pair<string, int>>& pontosJogadores, vector<pair<string, int>>& ranking);
 void tabelaRankingVitoriasGeral();
 void TabelaRankingVitorias4Jogadores();
 void TabelaRankingVitorias3Jogadores();
@@ -67,7 +68,7 @@ void imprimirTabuleiroColorido(const vector<vector<char>> &tabuleiro);
 void limparTela();
 string trim(const string &str);
 int lancarDado();
-bool moverPeao(vector<vector<char>> &tabuleiro, char cor, int movimentos);
+bool moverPeao(vector<vector<char>> &tabuleiro, char cor, int movimentos, const vector<Celula> &percurso);
 vector<vector<char>> criarTabuleiro();
 bool realizarJogada(vector<vector<char>> &tabuleiro, char cor);
 void capturarPeoesAdversarios(vector<vector<char>> &tabuleiro, int linha, int coluna, char corAdversario);
@@ -87,15 +88,20 @@ void tela_Cadastrar();
 void Tela_Jogar_MostrarTempoNaTela();
 void tela_Jogar(const std::vector<std::string> &nomesJogadores, const std::vector<std::string> &coresJogadores);
 void tela_Ranking();
-void tela_HistoricoPartidas();
+void tela_Historico();
 void tela_EditarPerfil();
 void tela_RecuperarSenha();
 void tela_Regras();
 void tela_ExcluirPerfil();
 
 int main() {
-    tela_Login();
+
+    //tela_Login();
+
+    tela_Menu();
+
     //selecionarQuantidadeJogParaPartida();
+
     return 0;
 }
 
@@ -123,19 +129,15 @@ void salvarJogador_txt(const string &nome, const string &senha, const string &pe
     }
 }
 
-void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<string, string>> jogadoresCores, unordered_map<string, int> ranking)
-{
+void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<string, string>> jogadoresCores, unordered_map<string, int> ranking) {
     ofstream arquivo("dadosPartida.txt", ios::app);
-    if (arquivo.is_open())
-    {
+    if (arquivo.is_open()) {
         arquivo << "Partida " << numeroPartida << " - " << dataHora << " - ";
-        for (const auto &jogadorCor : jogadoresCores)
-        {
+        for (const auto &jogadorCor : jogadoresCores) {
             arquivo << jogadorCor.first << " (" << jogadorCor.second << "), ";
         }
         arquivo << "- ";
-        for (const auto &jogadorPontos : ranking)
-        {
+        for (const auto &jogadorPontos : ranking) {
             arquivo << jogadorPontos.first << " - " << jogadorPontos.second << " pontos, ";
         }
         arquivo << endl;
@@ -144,9 +146,7 @@ void salvarDadosPartida_txt(int numeroPartida, string dataHora, vector<pair<stri
         cout << "Dados da partida salvos com sucesso." << endl;
         system("pause");
         tela_Menu();
-    }
-    else
-    {
+    } else {
         system("cls");
         cout << "Erro ao abrir o arquivo para salvar os dados da partida." << endl;
         system("pause");
@@ -227,7 +227,59 @@ vector<string> lerCsvDadosPartidatoHistorico() {
     return linhasPartida;
 }
 
-void lerCsvDadosPartidatoRanking(unordered_map<string, int>& vitoriasGeral, unordered_map<string, int>& vitorias4Jogadores, unordered_map<string, int>& vitorias3Jogadores, unordered_map<string, int>& vitorias2Jogadores) {
+void lerCsvDadosPartidatoRankingPontos(vector<pair<string, int>>& pontosJogadores) {
+    ifstream arquivo("dadosPartida.csv", ios::in);
+    if (!arquivo.is_open()) {
+        cout << "Erro ao abrir o arquivo de dados da partida." << endl;
+        return;
+    }
+
+    string linha;
+    while (getline(arquivo, linha)) {
+        // Verificar se a linha está vazia
+        if (linha.empty()) {
+            continue;
+        }
+
+        stringstream ss(linha);
+        string campo;
+        vector<string> dadosLinha;
+
+        // Separar os campos da linha
+        while (getline(ss, campo, '-')) {
+            dadosLinha.push_back(campo);
+        }
+
+        if (dadosLinha.size() >= 3) {  // Verifica se a linha tem pelo menos 3 campos após a separação por '-'
+            string jogadoresPontos = dadosLinha[2];
+            stringstream ssJogadoresPontos(jogadoresPontos);
+            string jogadorPonto;
+
+            // Separar os jogadores e pontos
+            while (getline(ssJogadoresPontos, jogadorPonto, ',')) {
+                stringstream ssJogadorPonto(jogadorPonto);
+                string nome;
+                string pontosStr;
+
+                getline(ssJogadorPonto, nome, '-');
+                getline(ssJogadorPonto, pontosStr);
+
+                try {
+                    int pontos = stoi(pontosStr);
+                    pontosJogadores.push_back(make_pair(nome, pontos));
+                } catch (const exception& e) {
+                    cout << "Erro ao processar a linha: " << linha << endl;
+                }
+            }
+        } else {
+            cout << "Erro: linha malformada no arquivo CSV: " << linha << endl;
+        }
+    }
+
+    arquivo.close();
+}
+
+void lerCsvDadosPartidatoRankingPartidas(unordered_map<string, int>& vitoriasGeral, unordered_map<string, int>& vitorias4Jogadores, unordered_map<string, int>& vitorias3Jogadores, unordered_map<string, int>& vitorias2Jogadores) {
     ifstream arquivo("DadosPartida.csv", ios::in);
     if (!arquivo.is_open()) {
         cout << "Erro ao abrir o arquivo de dados da partida." << endl;
@@ -244,9 +296,20 @@ void lerCsvDadosPartidatoRanking(unordered_map<string, int>& vitoriasGeral, unor
             dadosLinha.push_back(campo);
         }
 
-        if (dadosLinha.size() >= 4) {
-            int numJogadores = stoi(dadosLinha[0]);
-            string vencedor = dadosLinha[1];
+        if (dadosLinha.size() >= 4) {  // Verifica se a linha tem pelo menos 4 campos
+            int numJogadores;
+            string vencedor;
+
+            try {
+                numJogadores = stoi(dadosLinha[0]);
+                vencedor = dadosLinha[1];
+            } catch (const invalid_argument& e) {
+                cout << "Erro: valor inválido no campo de número de jogadores ou vencedor: " << linha << endl;
+                continue;
+            } catch (const out_of_range& e) {
+                cout << "Erro: valor fora do alcance no campo de número de jogadores ou vencedor: " << linha << endl;
+                continue;
+            }
 
             // Atualiza o número de vitórias
             vitoriasGeral[vencedor]++;
@@ -256,24 +319,34 @@ void lerCsvDadosPartidatoRanking(unordered_map<string, int>& vitoriasGeral, unor
                 vitorias3Jogadores[vencedor]++;
             } else if (numJogadores == 2) {
                 vitorias2Jogadores[vencedor]++;
+            } else {
+                cout << "Erro: número de jogadores inválido na linha: " << linha << endl;
             }
+        } else {
+            cout << "Erro: linha malformada no arquivo CSV: " << linha << endl;
         }
     }
 
     arquivo.close();
 }
 
-void salvarRankingPontuacao(const unordered_map<string, int>& pontosJogadores) {
+void salvarRankingPontuacao(const vector<pair<string, int>>& ranking) {
+    vector<pair<string, int>> rankingOrdenado = ranking;
+    
+    sort(rankingOrdenado.begin(), rankingOrdenado.end(), [](const pair<string, int>& a, const pair<string, int>& b) {
+        return b.second < a.second;
+    });
+
     ofstream arquivo("rankingPontuacao.csv", ios::out);
     if (!arquivo.is_open()) {
         cout << "Erro ao abrir o arquivo de ranking de pontuação." << endl;
         return;
     }
 
-    for (const auto& par : pontosJogadores) {
+    for (const auto& par : rankingOrdenado) {
         arquivo << par.first << "," << par.second << endl;
     }
-
+    
     arquivo.close();
 }
 
@@ -490,6 +563,7 @@ bool verificarNomeExistente(const string &nome)
 }
 
 void tabelaRankingPontos() {
+
     atualizarTabelaPontos();
 
     ifstream arquivo("rankingPontuacao.csv", ios::in);
@@ -499,25 +573,46 @@ void tabelaRankingPontos() {
     }
 
     string linha;
+    int linhaNumero = 0;
+
     while (getline(arquivo, linha)) {
-        cout << linha << endl;
+        if (linhaNumero == 0) {
+            cout << "------- CAMPEAO DOS CAMPEOES -------" << endl;
+            cout << linha << endl;
+            cout << endl; // Pula uma linha após o primeiro jogador
+        } else {
+            cout << linhaNumero + 1 << " - " << linha << endl;
+        }
+        linhaNumero++;
     }
 
     arquivo.close();
+    cout << endl << endl << "Pressione Enter para voltar ao Menu" << endl;
+    cin.ignore(); // Ignora o caractere de nova linha restante no buffer
+    cin.get();    // Espera pelo pressionamento de uma tecla
+    tela_Menu();
 }
 
- void atualizarTabelaPontos() {
-//     unordered_map<string, int> pontosJogadores;
-//     vector<pair<string, pair<string, int>>> ranking;
+void atualizarTabelaPontos() {
+    // vector<pair<string, int>> pontosJogadores;
+    // vector<pair<string, int>> ranking;
 
-//     lerCsvDadosPartidatoRanking(pontosJogadores, ranking);
-
-//     salvarRankingPontuacao(pontosJogadores);
+    // lerCsvDadosPartidatoRankingPontos(pontosJogadores);
+    // somarPontosDosJogadores(pontosJogadores, ranking);
+    // salvarRankingPontuacao(ranking);
 }
 
-void somarPontosDosJogadores(unordered_map<string, int>& pontosJogadores, const vector<pair<string, pair<string, int>>>& ranking) {
-    for (const auto& par : ranking) {
-        pontosJogadores[par.first] += par.second.second;  // Adiciona os pontos do jogador
+void somarPontosDosJogadores(const vector<pair<string, int>>& pontosJogadores, vector<pair<string, int>>& ranking) {
+    for (const auto& par : pontosJogadores) {
+        auto it = find_if(ranking.begin(), ranking.end(), [&](const pair<string, int>& elemento) {
+            return elemento.first == par.first;
+        });
+        
+        if (it != ranking.end()) {
+            it->second += par.second;
+        } else {
+            ranking.push_back(par);
+        }
     }
 }
 
@@ -531,11 +626,26 @@ void tabelaRankingVitoriasGeral() {
     }
 
     string linha;
+    int linhaNumero = 0;
+
     while (getline(arquivo, linha)) {
-        cout << linha << endl;
+        if (linhaNumero == 0) {
+            cout << "------- REI GLADIADOR -------" << endl;
+            cout << linha << endl;
+            cout << endl; // Pula uma linha após o primeiro jogador
+        } else {
+            cout << linhaNumero + 1 << " - " << linha << endl;
+        }
+        linhaNumero++;
     }
 
     arquivo.close();
+
+    arquivo.close();
+    cout << endl << endl << "Pressione Enter para voltar ao Menu" << endl;
+    cin.ignore(); // Ignora o caractere de nova linha restante no buffer
+    cin.get();    // Espera pelo pressionamento de uma tecla
+    tela_Menu();
 }
 
 void TabelaRankingVitorias4Jogadores() {
@@ -548,11 +658,26 @@ void TabelaRankingVitorias4Jogadores() {
     }
 
     string linha;
+    int linhaNumero = 0;
+
     while (getline(arquivo, linha)) {
-        cout << linha << endl;
+        if (linhaNumero == 0) {
+            cout << "------- GRANDE GLADIADOR -------" << endl;
+            cout << linha << endl;
+            cout << endl; // Pula uma linha após o primeiro jogador
+        } else {
+            cout << linhaNumero + 1 << " - " << linha << endl;
+        }
+        linhaNumero++;
     }
 
     arquivo.close();
+
+    arquivo.close();
+    cout << endl << endl << "Pressione Enter para voltar ao Menu" << endl;
+    cin.ignore(); // Ignora o caractere de nova linha restante no buffer
+    cin.get();    // Espera pelo pressionamento de uma tecla
+    tela_Menu();
 }
 
 void TabelaRankingVitorias3Jogadores() {
@@ -565,11 +690,26 @@ void TabelaRankingVitorias3Jogadores() {
     }
 
     string linha;
+    int linhaNumero = 0;
+
     while (getline(arquivo, linha)) {
-        cout << linha << endl;
+        if (linhaNumero == 0) {
+            cout << "------- CHEFE GUERREIRO -------" << endl;
+            cout << linha << endl;
+            cout << endl; // Pula uma linha após o primeiro jogador
+        } else {
+            cout << linhaNumero + 1 << " - " << linha << endl;
+        }
+        linhaNumero++;
     }
 
     arquivo.close();
+
+    arquivo.close();
+    cout << endl << endl << "Pressione Enter para voltar ao Menu" << endl;
+    cin.ignore(); // Ignora o caractere de nova linha restante no buffer
+    cin.get();    // Espera pelo pressionamento de uma tecla
+    tela_Menu();
 }
 
 void TabelaRankingVitorias2Jogadores() {
@@ -582,26 +722,41 @@ void TabelaRankingVitorias2Jogadores() {
     }
 
     string linha;
+    int linhaNumero = 0;
+
     while (getline(arquivo, linha)) {
-        cout << linha << endl;
+        if (linhaNumero == 0) {
+            cout << "------- MESTRE DO X1 -------" << endl;
+            cout << linha << endl;
+            cout << endl; // Pula uma linha após o primeiro jogador
+        } else {
+            cout << linhaNumero + 1 << " - " << linha << endl;
+        }
+        linhaNumero++;
     }
 
     arquivo.close();
+        
+    arquivo.close();
+    cout << endl << endl << "Pressione Enter para voltar ao Menu" << endl;
+    cin.ignore(); // Ignora o caractere de nova linha restante no buffer
+    cin.get();    // Espera pelo pressionamento de uma tecla
+    tela_Menu();
 }
 
 void atualizarTabelaVitorias() {
 
-    unordered_map<string, int> vitoriasGeral;
-    unordered_map<string, int> vitorias4Jogadores;
-    unordered_map<string, int> vitorias3Jogadores;
-    unordered_map<string, int> vitorias2Jogadores;
+    // unordered_map<string, int> vitoriasGeral;
+    // unordered_map<string, int> vitorias4Jogadores;
+    // unordered_map<string, int> vitorias3Jogadores;
+    // unordered_map<string, int> vitorias2Jogadores;
 
-    lerCsvDadosPartidatoRanking(vitoriasGeral, vitorias4Jogadores, vitorias3Jogadores, vitorias2Jogadores);
+    // lerCsvDadosPartidatoRankingPartidas(vitoriasGeral, vitorias4Jogadores, vitorias3Jogadores, vitorias2Jogadores);
 
-    salvarVitoriasGeral(vitoriasGeral);
-    salvarVitorias4Jogadores(vitorias4Jogadores);
-    salvarVitorias3Jogadores(vitorias3Jogadores);
-    salvarVitorias2Jogadores(vitorias2Jogadores);
+    // salvarVitoriasGeral(vitoriasGeral);
+    // salvarVitorias4Jogadores(vitorias4Jogadores);
+    // salvarVitorias3Jogadores(vitorias3Jogadores);
+    // salvarVitorias2Jogadores(vitorias2Jogadores);
 }
 
 bool verificarTamanhoSenha(const string &senha)
@@ -715,20 +870,17 @@ void excluirPerfil(const string &nome, const string &senha, const string &respos
     }
 }
 
-int selecionarQuantidadeJogParaPartida()
-{
+int selecionarQuantidadeJogParaPartida() {
     int num_jogadores;
-    do
-    {
+    do {
         cout << "Digite a quantidade de jogadores (entre 2 e 4): ";
         cin >> num_jogadores;
-        if (num_jogadores < 2 || num_jogadores > 4)
-        {
+        if (num_jogadores < 2 || num_jogadores > 4) {
             cout << "Quantidade de jogadores invalida. Por favor, escolha entre 2 e 4 jogadores.\n";
         }
     } while (num_jogadores < 2 || num_jogadores > 4);
-    // Chamando o método selecionarJogadoresECoresParaPartida() com o número de jogadores selecionado
     selecionarJogadoresECoresParaPartida(num_jogadores);
+    return num_jogadores; // Adicionado retorno do número de jogadores
 }
 
 void selecionarJogadoresECoresParaPartida(int num_jogadores) {
@@ -761,7 +913,7 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores) {
         sort(jogadores.begin(), jogadores.end());
 
         cout << "Lista de Jogadores:\n";
-        for (int i = 0; i < jogadores.size(); ++i) {
+        for (size_t i = 0; i < jogadores.size(); ++i) {
             cout << i + 1 << ". " << jogadores[i].first << "\n";
         }
 
@@ -804,18 +956,18 @@ void selecionarJogadoresECoresParaPartida(int num_jogadores) {
         }
 
         cout << "\nAssocie as cores aos jogadores:\n";
-        for (int i = 0; i < jogadoresSelecionados.size(); ++i) {
+        for (size_t i = 0; i < jogadoresSelecionados.size(); ++i) {
             limparTela();
 
             cout << "Escolha a cor para o jogador " << jogadoresSelecionados[i] << ":\n";
 
             // Mostrar cores disponíveis
             cout << "Cores disponiveis:\n";
-            for (int j = 0; j < coresDisponiveis.size(); ++j) {
+            for (size_t j = 0; j < coresDisponiveis.size(); ++j) {
                 cout << j + 1 << ". " << coresDisponiveis[j].first << "\n";
             }
 
-            int corEscolhida;
+            size_t corEscolhida;
             do {
                 cout << "Selecione o numero da sua cor: ";
                 cin >> corEscolhida;
@@ -1152,7 +1304,6 @@ vector<vector<char>> criarTabuleiro()
 }
 
 bool realizarJogada(vector<vector<char>> &tabuleiro, char cor) {
-    // Lançar o dado
     int movimentos = lancarDado();
     cout << "Jogador " << cor << " tirou " << movimentos << " no dado." << endl;
 
@@ -1170,14 +1321,42 @@ bool realizarJogada(vector<vector<char>> &tabuleiro, char cor) {
             if (opcao == 'r' || opcao == 'R') {
                 retirarPecaDaToca(tabuleiro, cor);
             } else {
-                if (moverPeao(tabuleiro, cor, movimentos)) {
-                    return true; // Indica que o jogador pode jogar novamente
+                if (cor == 'R') {
+                    if (moverPeao(tabuleiro, cor, movimentos, definirPercursoVermelho())) {
+                        return true;
+                    }
+                } else if (cor == 'B') {
+                    if (moverPeao(tabuleiro, cor, movimentos, definirPercursoAzul())) {
+                        return true;
+                    }
+                } else if (cor == 'Y') {
+                    if (moverPeao(tabuleiro, cor, movimentos, definirPercursoAmarelo())) {
+                        return true;
+                    }
+                } else if (cor == 'G') {
+                    if (moverPeao(tabuleiro, cor, movimentos, definirPercursoVerde())) {
+                        return true;
+                    }
                 }
             }
         }
     } else {
-        if (moverPeao(tabuleiro, cor, movimentos)) {
-            return true; // Indica que o jogador pode jogar novamente
+        if (cor == 'R') {
+            if (moverPeao(tabuleiro, cor, movimentos, definirPercursoVermelho())) {
+                return true;
+            }
+        } else if (cor == 'B') {
+            if (moverPeao(tabuleiro, cor, movimentos, definirPercursoAzul())) {
+                return true;
+            }
+        } else if (cor == 'Y') {
+            if (moverPeao(tabuleiro, cor, movimentos, definirPercursoAmarelo())) {
+                return true;
+            }
+        } else if (cor == 'G') {
+            if (moverPeao(tabuleiro, cor, movimentos, definirPercursoVerde())) {
+                return true;
+            }
         }
     }
 
@@ -1358,7 +1537,7 @@ void tela_Menu() {
     } else if (opcao_Menu == 2) {
         tela_Ranking();
     } else if (opcao_Menu == 3) {
-        tela_HistoricoPartidas();
+        tela_Historico();
     } else if (opcao_Menu == 4) {
         tela_EditarPerfil();
     } else if (opcao_Menu == 5) {
@@ -1535,7 +1714,7 @@ void tela_Ranking() {
     }
 }
 
-void tela_HistoricoPartidas() {
+void tela_Historico() {
     system("cls"); // Limpa o console antes de exibir o histórico de partidas
 
     string nomeJogador;
@@ -1559,7 +1738,7 @@ void tela_HistoricoPartidas() {
         system("cls");
         cout << "Opcao invalida. Tente novamente." << endl;
         system("pause");
-        tela_HistoricoPartidas();
+        tela_Historico();
     }
 }
 

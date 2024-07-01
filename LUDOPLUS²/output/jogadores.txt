@@ -6,15 +6,11 @@ Nome: bruno
 Senha: 1234
 pergunta: nome
 resposta: bruno
-Nome: carlos
-Senha: 1234
-pergunta: cachorro
-resposta: cleo
 Nome: pedro
-Senha: 23022302
+Senha: 2302230217
 pergunta segurança: toop
 resposta pergunta: int
-Nome: Carlos
+Nome: carlos
 Senha: 1597532684
 Pergunta: carlos
 Resposta: eduardo
